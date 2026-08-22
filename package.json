@@ -1,0 +1,21 @@
+{
+  "name": "money-agent-x402-seller",
+  "version": "0.1.0",
+  "description": "x402 seller API - data endpoints paid in USDC on Base. Built by Money Agent RU.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@x402/core": "^2.23.0",
+    "@x402/evm": "^2.23.0",
+    "@x402/express": "^2.23.0",
+    "@x402/svm": "^2.23.0",
+    "express": "^4.21.2"
+  }
+}
