@@ -22,6 +22,9 @@ NODE_ENV=test npm start
 
 # mainnet (Base, реальный USDC)
 npm start
+
+# тесты (node --test: boot + 402-флоу + OpenAPI-контракт, 4 теста)
+npm test
 ```
 
 Проверка 402-ответа (без оплаты):
