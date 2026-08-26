@@ -17,6 +17,7 @@ const EXPECTED = {
   "/v1/testnet/status": ["30000", "0.03"],
   "/v1/defi/yields": ["30000", "0.03"],
   "/v1/github/trending": ["20000", "0.02"],
+  "/v1/agent/pulse": ["50000", "0.05"],
 };
 
 let server;
@@ -65,10 +66,10 @@ test("healthz reports testnet mode", async () => {
   assert.equal(d.testnet, true);
 });
 
-test("openapi.json: 5 paid paths with x-payment-info", async () => {
+test("openapi.json: 6 paid paths with x-payment-info", async () => {
   const d = await (await fetch(`${BASE}/openapi.json`)).json();
   assert.equal(d.info.title, "Money Agent RU Data API");
-  assert.equal(Object.keys(d.paths).length, 5);
+  assert.equal(Object.keys(d.paths).length, 6);
   for (const [p, [, price]] of Object.entries(EXPECTED)) {
     const op = d.paths[p].get;
     assert.ok(op["x-payment-info"], `${p} missing x-payment-info`);
@@ -87,5 +88,5 @@ test("all routes return 402 with correct payTo + atomic-unit amounts", async () 
 
 test("root endpoint lists all paid endpoints", async () => {
   const d = await (await fetch(`${BASE}/`)).json();
-  assert.equal(d.endpoints.length, 5);
+  assert.equal(d.endpoints.length, 6);
 });

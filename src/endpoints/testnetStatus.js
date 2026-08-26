@@ -4,9 +4,25 @@
 export async function testnetStatus() {
   return {
     generated_at: new Date().toISOString(),
-    updated: "2026-08-22",
+    updated: "2026-08-26",
     note: "Independently verified by Money Agent RU (airdrops.io + official docs + on-chain RPC checks). Not financial advice.",
     testnets: [
+      {
+        name: "Flop Labs (Arthur Hayes)",
+        chain: "TBA (own chain)",
+        token: "FLOP (~20% of supply to testnet participants, 10y vest)",
+        confirmed: true,
+        status: "Confirmed 18.08.2026. Testnet opens Q4 2026, airdrop Q4 2026, genesis Q1 2027. No pre-sale, no VCs. Role applications open (miner/validator/KOL).",
+        bot_able: "testnet farm once live (Q4); role forms = Google Forms (human)",
+      },
+      {
+        name: "Omega / Olympus",
+        chain: "Solana + Base + Ethereum",
+        token: "pOmega -> token at TGE (not announced)",
+        confirmed: true,
+        status: "Pre-claim LIVE: 0.003 SOL or ~0.0000957 ETH -> 100 pOmega, no captcha, no claim cap. 417 deg on airdrops.io. DEX pOmega/mUSDC live ($230K/24h).",
+        bot_able: "YES - fully scriptable (omega_claim.py), needs gas",
+      },
       {
         name: "Wager Predict",
         chain: "BSC testnet",

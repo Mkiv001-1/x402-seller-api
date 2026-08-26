@@ -15,6 +15,7 @@ import * as fundingApy from "./endpoints/fundingApy.js";
 import * as testnetStatus from "./endpoints/testnetStatus.js";
 import * as defiYields from "./endpoints/defiYields.js";
 import * as githubTrending from "./endpoints/githubTrending.js";
+import * as agentPulse from "./endpoints/agentPulse.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -71,6 +72,12 @@ const routes = {
     null,
     { repos: [{ full_name: "org/repo", stars: 1000, language: "Python" }] }
   ),
+  "GET /v1/agent/pulse": accept(
+    config.prices.agentPulse,
+    agentPulse.meta.description,
+    null,
+    { markets: [{ platform: "dealwork.ai", total_listings: 20, supply_side: 17 }] }
+  ),
 };
 
 app.use(paymentMiddleware(routes, resourceServer));
@@ -95,9 +102,9 @@ const openapi = {
     title: "Money Agent RU Data API",
     version: "0.1.0",
     description:
-      "Pay-per-request data endpoints for AI agents: crypto prices, Bybit funding APY, verified testnet airdrop landscape, DeFi stablecoin yields, GitHub trending. Pay with USDC on Base via x402 - no API keys, no registration.",
+      "Pay-per-request data endpoints for AI agents: crypto prices, Bybit funding APY, verified testnet airdrop landscape, DeFi stablecoin yields, GitHub trending, agent-economy market pulse. Pay with USDC on Base via x402 - no API keys, no registration.",
     "x-guidance":
-      "All endpoints are GET, paid via x402 (HTTP 402 challenge). Request any endpoint without payment to receive a 402 + PAYMENT-REQUIRED header with exact instructions. Pay in USDC on Base (eip155:8453) or USDC on Solana. Endpoints return JSON. /v1/funding/apy is unique live Bybit perp funding APY data; /v1/testnet/status is a curated verified airdrop landscape. Cache-friendly: data refreshed every 60s.",
+      "All endpoints are GET, paid via x402 (HTTP 402 challenge). Request any endpoint without payment to receive a 402 + PAYMENT-REQUIRED header with exact instructions. Pay in USDC on Base (eip155:8453) or USDC on Solana. Endpoints return JSON. /v1/funding/apy is unique live Bybit perp funding APY data; /v1/testnet/status is a curated verified airdrop landscape; /v1/agent/pulse is a live supply-vs-demand read across AI-agent marketplaces (unique). Cache-friendly: data refreshed every 60s.",
     contact: { email: "michael.ivanov.tm@gmail.com" },
   },
   paths: {},
@@ -158,6 +165,9 @@ openapi.paths["/v1/defi/yields"] = {
 openapi.paths["/v1/github/trending"] = {
   get: pathSchema("GitHub trending repos", "githubTrending", githubTrending.meta.description, config.prices.githubTrending),
 };
+openapi.paths["/v1/agent/pulse"] = {
+  get: pathSchema("Agent-economy market pulse", "agentPulse", agentPulse.meta.description, config.prices.agentPulse),
+};
 
 app.get("/openapi.json", (_req, res) => res.json(openapi));
 
@@ -192,6 +202,11 @@ app.get("/v1/defi/yields", async (_req, res) => {
 
 app.get("/v1/github/trending", async (_req, res) => {
   try { res.json(await githubTrending.githubTrending()); }
+  catch (e) { res.status(502).json({ error: "upstream failed", detail: e.message }); }
+});
+
+app.get("/v1/agent/pulse", async (_req, res) => {
+  try { res.json(await agentPulse.agentPulse()); }
   catch (e) { res.status(502).json({ error: "upstream failed", detail: e.message }); }
 });
 

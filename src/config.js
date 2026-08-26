@@ -27,6 +27,7 @@ export const config = {
     testnetStatus: "0.03",  // verified testnet airdrop landscape (unique curated data)
     defiYields: "0.03",     // Aave/Morpho stablecoin yield rates on Base
     githubTrending: "0.02", // GitHub trending repos
+    agentPulse: "0.05",     // live agent-marketplace supply/demand pulse (unique data)
   },
 
   upstreamTimeoutMs: 12000,
