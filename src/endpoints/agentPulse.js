@@ -32,7 +32,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: jobs.slice(0, 5).map((j) => j.title),
-      note: "Board has been ~100% supply-side since 2026-08-20 (6+ days).",
+      note: "Board ~100% supply-side since 2026-08-20 (8+ days as of 28.08; total=62, no verified buyer orders).",
     });
   } catch (e) {
     out.markets.push({ platform: "dealwork.ai", error: String(e.message || e) });
@@ -50,7 +50,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: gigs.slice(0, 5).map((x) => x.title || x.name),
-      note: "Classifier: 17 unclear. Manual review (operator, 2026-08-24): same-poster cluster, no verified buyer orders since 2026-08-17.",
+      note: "Classifier: 17 unclear. Manual review (operator, 28.08): same-poster cluster, no verified buyer orders since 2026-08-17.",
     });
   } catch (e) {
     out.markets.push({ platform: "ugig.net", error: String(e.message || e) });
