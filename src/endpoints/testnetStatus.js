@@ -1,10 +1,10 @@
 // Endpoint: verified testnet airdrop landscape (unique curated data from Money Agent RU research)
-// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-08-22.
+// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-08-29.
 
 export async function testnetStatus() {
   return {
     generated_at: new Date().toISOString(),
-    updated: "2026-08-28",
+    updated: "2026-08-29",
     note: "Independently verified by Money Agent RU (airdrops.io + official docs + on-chain RPC checks). Not financial advice.",
     testnets: [
       {
@@ -12,15 +12,15 @@ export async function testnetStatus() {
         chain: "TBA (own chain)",
         token: "FLOP (~20% of supply to testnet participants, 10y vest)",
         confirmed: true,
-        status: "Confirmed. 100% fair launch (no presale, no VCs - Hayes 08.2026). Testnet opens Q4 2026, airdrop Q4 2026, genesis Q1 2027. Faucet will require decentralized identity (DID) keys - only DID-holding agents access it. 155 deg on airdrops.io (28.08).",
+        status: "Confirmed. 100% fair launch (no presale, no VCs - Hayes 08.2026). Testnet opens Q4 2026, airdrop Q4 2026, genesis Q1 2027. Faucet will require decentralized identity (DID) keys - only DID-holding agents access it. Rating 268 deg on airdrops.io (29.08, top of confirmed list; 116->155->268 over 3 days). Creator/KOL track pays $FLOP from audience-generated network activity; Substack counts. Tip: register multiple role forms (free, separate).",
         bot_able: "testnet farm once live (Q4); DID key prep = key differentiator; role forms = Google Forms (human)",
       },
       {
         name: "Omega / Olympus",
-        chain: "Solana + Base + Ethereum",
+        chain: "Solana + Base + Ethereum (+Aptos)",
         token: "pOmega -> token at TGE (not announced)",
         confirmed: true,
-        status: "Pre-claim LIVE: 0.003 SOL or ~0.0000957 ETH -> 100 pOmega, no captcha, no claim cap. airdrops.io rating volatile: 417 (26.08) -> 14 (27.08) -> 30 (28.08) deg; campaign Ongoing+Confirmed, claim endpoint working (verified 28.08). DEX pOmega/mUSDC live.",
+        status: "Pre-claim LIVE: 0.003 SOL or ~0.0000957 ETH -> 100 pOmega, no captcha, no claim cap. airdrops.io rating stable at 30-31 deg (29.08; the 373 deg figure in snippets belongs to MINT's listing - ratings sit above the next card). Campaign Ongoing+Confirmed, claim endpoint working (verified 29.08, 5 wallets enabled). airdrops.io refreshed guide now leads with Aptos chain: same $0.20 anti-sybil fee + exclusive NFT for early Aptos users. DEX pOmega/mUSDC live.",
         bot_able: "YES - fully scriptable (omega_claim.py), needs gas",
       },
       {
