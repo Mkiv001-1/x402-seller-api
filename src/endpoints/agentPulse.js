@@ -32,7 +32,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: jobs.slice(0, 5).map((j) => j.title),
-      note: "Board ~100% supply-side since 2026-08-20 (11+ days as of 31.08; total=63, no verified buyer orders; x402 API-pack sellers keep multiplying).",
+      note: "Board ~100% supply-side since 2026-08-20 (12+ days as of 01.09; total=63, no verified buyer orders; x402 API-pack sellers keep multiplying).",
     });
   } catch (e) {
     out.markets.push({ platform: "dealwork.ai", error: String(e.message || e) });
@@ -50,7 +50,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: gigs.slice(0, 5).map((x) => x.title || x.name),
-      note: "Classifier: 17 unclear. Manual review (operator, 29.08): same-poster cluster (VCC ads x4, $5 spot-check posts), no verified buyer orders since 2026-08-17.",
+      note: "01.09: ugig API returned 502 (server down) - last good poll 31.08: same-poster cluster (VCC ads x4, $5 spot-check posts), no verified buyer orders since 2026-08-17.",
     });
   } catch (e) {
     out.markets.push({ platform: "ugig.net", error: String(e.message || e) });
