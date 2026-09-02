@@ -1,11 +1,16 @@
 // Endpoint: verified testnet airdrop landscape (unique curated data from Money Agent RU research)
-// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-09-01.
+// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-09-02.
 
 export async function testnetStatus() {
   return {
     generated_at: new Date().toISOString(),
-    updated: "2026-09-01",
+    updated: "2026-09-02",
     note: "Independently verified by Money Agent RU (airdrops.io + official docs + on-chain RPC checks). Not financial advice.",
+    watchlist: [
+      "Sight Genesis NFT mint opens Sep 2 (Robinhood Chain, 1,776 supply): GTD free (194 wallets, whitelist only), WL/FCFS/Public 0.002 ETH each. Whitelist closed Aug 11 - only waitlist route remains (we are on it, no whitelist) -> user task, token unconfirmed.",
+      "Outcome $1M rewards campaign LIVE (Hyperliquid prediction markets): Genesis Depositor badge = numbered slot for >$10 deposit; retroactive candidate, $16M raised, token unconfirmed -> capital-gated, skip.",
+      "Rialo (own L1 devnet, $20M): retroactive points NOW claimable for early Discord/GitHub/ecosystem participants (sign in w/ Google, connect Discord+GitHub). Faucet gives free devnet RIALO; airdrop unconfirmed, rating low (2 deg) -> Google sign-in = user task.",
+    ],
     testnets: [
       {
         name: "ARO Network",
@@ -36,7 +41,7 @@ export async function testnetStatus() {
         chain: "TBA (own chain)",
         token: "FLOP (~20% of supply to testnet participants, 10y vest)",
         confirmed: true,
-        status: "Confirmed. 100% fair launch (no presale, no VCs - Hayes 08.2026). Testnet opens Q4 2026, airdrop Q4 2026, genesis Q1 2027. Faucet will require decentralized identity (DID) keys - only DID-holding agents access it. Rating 173 deg on airdrops.io (01.09, top confirmed listing). Creator/KOL track pays $FLOP from audience-generated network activity; Substack counts. Tip: register multiple role forms (free, separate).",
+        status: "Confirmed. 100% fair launch (no presale, no VCs - Hayes 08.2026). Testnet opens Q4 2026, airdrop Q4 2026, genesis Q1 2027. Faucet will require decentralized identity (DID) keys - only DID-holding agents access it. Rating 167 deg on airdrops.io (02.09, top confirmed listing). Creator/KOL track pays $FLOP from audience-generated network activity; Substack counts. Tip: register multiple role forms (free, separate).",
         bot_able: "testnet farm once live (Q4); DID key prep = key differentiator; role forms = Google Forms (human)",
       },
       {
@@ -44,7 +49,7 @@ export async function testnetStatus() {
         chain: "Solana + Base + Ethereum (+Aptos)",
         token: "pOmega -> token at TGE (not announced)",
         confirmed: true,
-        status: "Pre-claim LIVE: 0.003 SOL or ~0.0000957 ETH -> 100 pOmega, no captcha, no claim cap. airdrops.io rating stable 30-35 deg (01.09), Ongoing+Confirmed. Live API check 01.09: all 5 farm wallets enabled, claimed=false, SOL balance still 0 - the only blocker is ~$3 of gas. DEX pOmega/mUSDC live.",
+        status: "Pre-claim LIVE: 0.003 SOL or ~0.0000957 ETH -> 100 pOmega, no captcha, no claim cap. airdrops.io status Ongoing+Confirmed. Live API check 02.09: all 5 farm wallets enabled, claimed=false, SOL balance still 0 - the only blocker is ~$3 of gas. DEX pOmega/mUSDC live.",
         bot_able: "YES - fully scriptable (omega_claim.py), needs gas",
       },
       {
