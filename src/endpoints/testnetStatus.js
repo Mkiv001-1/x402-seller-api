@@ -1,17 +1,34 @@
 // Endpoint: verified testnet airdrop landscape (unique curated data from Money Agent RU research)
-// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-09-02.
+// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-09-03.
 
 export async function testnetStatus() {
   return {
     generated_at: new Date().toISOString(),
-    updated: "2026-09-02",
+    updated: "2026-09-03",
     note: "Independently verified by Money Agent RU (airdrops.io + official docs + on-chain RPC checks). Not financial advice.",
     watchlist: [
-      "Sight Genesis NFT mint opens Sep 2 (Robinhood Chain, 1,776 supply): GTD free (194 wallets, whitelist only), WL/FCFS/Public 0.002 ETH each. Whitelist closed Aug 11 - only waitlist route remains (we are on it, no whitelist) -> user task, token unconfirmed.",
-      "Outcome $1M rewards campaign LIVE (Hyperliquid prediction markets): Genesis Depositor badge = numbered slot for >$10 deposit; retroactive candidate, $16M raised, token unconfirmed -> capital-gated, skip.",
-      "Rialo (own L1 devnet, $20M): retroactive points NOW claimable for early Discord/GitHub/ecosystem participants (sign in w/ Google, connect Discord+GitHub). Faucet gives free devnet RIALO; airdrop unconfirmed, rating low (2 deg) -> Google sign-in = user task.",
+      "DeepBook (Sui, DEEP): Season 1 points claims LIVE - but eligibility = trading via margin-enabled DeepBook apps Jan 22-Apr 17 2026; our wallets have no SUI history -> not eligible, skip. New trading-app waitlist = email signup (referrals move queue). Claims close 30 days after portal launch, unclaimed forfeited.",
+      "Glider (a16z CSX $4M + Coinbase/Uniswap Ventures): DRIP Store (redeem beta points for roles/multipliers) open UNTIL Sep 6; beta points -> real points x7 at launch. Points accrue from deposits (1 pt/day/$) = capital-gated, skip.",
+      "Gyndore (Base Sepolia DEX, airdrop UNCONFIRMED 0 deg): free public testnet - mint 1 cbBTC/50k USDC/25k GYND/1k bGYND per address per 24h, swap/LP/stake on testnet. Gas = Base Sepolia ETH via Alchemy faucet. On-chain actions bot-able once faucet gas solved; unconfirmed token -> watchlist only.",
+      "DualMint UPTIME (DMT, Arbitrum/Base, unconfirmed): Epoch 1 points campaign - email + 6-digit code signup, queue reservation, referrals 750 pts (paid after X link), X-connect opens before Epoch 1 close. Email-code signup = user task, low rating.",
     ],
     testnets: [
+      {
+        name: "Gyndore",
+        chain: "Base Sepolia (DEX)",
+        token: "GYND (NOT announced)",
+        confirmed: false,
+        status: "NEW 03.09 (airdrops.io 28 deg): free public testnet for a perp/DEX protocol. Onboarding mint per address per 24h: 1 cbBTC, 50,000 USDC, 25,000 GYND, 1,000 bGYND + community tokens. Test flows: swaps both directions, LP (narrow + full range), stake GYND/bGYND (USDC rewards accrue per block, no lockup), bGYND unbonding. Team: open testnet to find confusing flows before mainnet; no token allocation/snapshot announced. Gas = Base Sepolia ETH (Alchemy faucet).",
+        bot_able: "YES for on-chain loops (mint/swap/LP/stake via RPC) once Base Sepolia ETH gas is obtained; airdrop unconfirmed so low priority",
+      },
+      {
+        name: "DualMint UPTIME",
+        chain: "Arbitrum + Base",
+        token: "DMT (NOT announced)",
+        confirmed: false,
+        status: "NEW 03.09: UPTIME points campaign, Epoch 1 running (Epoch 0 locked). Signup = email + 6-digit code (no password), one entry per address, queue position + leaderboard + machine-uptime view. Referral 750 pts after invitee links X; own X-connect 250 pts (opens before Epoch 1 close). Claims at Epoch 1 close via connected X account.",
+        bot_able: "email-code signup = user; X-connect required for claims = user",
+      },
       {
         name: "ARO Network",
         chain: "L2 on Base (edge cloud)",
@@ -41,7 +58,7 @@ export async function testnetStatus() {
         chain: "TBA (own chain)",
         token: "FLOP (~20% of supply to testnet participants, 10y vest)",
         confirmed: true,
-        status: "Confirmed. 100% fair launch (no presale, no VCs - Hayes 08.2026). Testnet opens Q4 2026, airdrop Q4 2026, genesis Q1 2027. Faucet will require decentralized identity (DID) keys - only DID-holding agents access it. Rating 167 deg on airdrops.io (02.09, top confirmed listing). Creator/KOL track pays $FLOP from audience-generated network activity; Substack counts. Tip: register multiple role forms (free, separate).",
+        status: "Confirmed. 100% fair launch (no presale, no VCs - Hayes 08.2026). Testnet opens Q4 2026, airdrop Q4 2026, genesis Q1 2027. Faucet will require decentralized identity (DID) keys - only DID-holding agents access it. Rating 159 deg on airdrops.io (03.09, top confirmed listing). Creator/KOL track pays $FLOP from audience-generated network activity; Substack counts. Tip: register multiple role forms (free, separate).",
         bot_able: "testnet farm once live (Q4); DID key prep = key differentiator; role forms = Google Forms (human)",
       },
       {

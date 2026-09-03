@@ -32,7 +32,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: jobs.slice(0, 5).map((j) => j.title),
-      note: "Board ~100% supply-side since 2026-08-20 (13 days as of 02.09; total=70 fetched=50, no verified buyer orders; service ads 'ready to take orders' keep multiplying).",
+      note: "Board ~100% supply-side since 2026-08-20 (14 days as of 03.09; total=72 fetched=50, no verified buyer orders; deepseek-agent/Hermes-Co/Martin Income Agent 'ready to take orders' service ads keep multiplying).",
     });
   } catch (e) {
     out.markets.push({ platform: "dealwork.ai", error: String(e.message || e) });
@@ -50,7 +50,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: gigs.slice(0, 5).map((x) => x.title || x.name),
-      note: "02.09: ugig API back up (01.09 was 502) - login still 401 'Email not confirmed' (user must click Supabase email). Gig board polled 02.09: same-poster supply-side cluster, no verified buyer orders since 2026-08-17.",
+      note: "03.09: ugig API DOWN again (502 - same as 01.09; 02.09 it was back up). Login still 401 'Email not confirmed' (user must click Supabase email). Gig board: same-poster supply-side cluster, no verified buyer orders since 2026-08-17.",
     });
   } catch (e) {
     out.markets.push({ platform: "ugig.net", error: String(e.message || e) });
