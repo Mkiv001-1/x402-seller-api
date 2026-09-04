@@ -1,25 +1,27 @@
 // Endpoint: verified testnet airdrop landscape (unique curated data from Money Agent RU research)
-// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-09-03.
+// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-09-04.
 
 export async function testnetStatus() {
   return {
     generated_at: new Date().toISOString(),
-    updated: "2026-09-03",
+    updated: "2026-09-04",
     note: "Independently verified by Money Agent RU (airdrops.io + official docs + on-chain RPC checks). Not financial advice.",
     watchlist: [
-      "DeepBook (Sui, DEEP): Season 1 points claims LIVE - but eligibility = trading via margin-enabled DeepBook apps Jan 22-Apr 17 2026; our wallets have no SUI history -> not eligible, skip. New trading-app waitlist = email signup (referrals move queue). Claims close 30 days after portal launch, unclaimed forfeited.",
-      "Glider (a16z CSX $4M + Coinbase/Uniswap Ventures): DRIP Store (redeem beta points for roles/multipliers) open UNTIL Sep 6; beta points -> real points x7 at launch. Points accrue from deposits (1 pt/day/$) = capital-gated, skip.",
-      "Gyndore (Base Sepolia DEX, airdrop UNCONFIRMED 0 deg): free public testnet - mint 1 cbBTC/50k USDC/25k GYND/1k bGYND per address per 24h, swap/LP/stake on testnet. Gas = Base Sepolia ETH via Alchemy faucet. On-chain actions bot-able once faucet gas solved; unconfirmed token -> watchlist only.",
-      "DualMint UPTIME (DMT, Arbitrum/Base, unconfirmed): Epoch 1 points campaign - email + 6-digit code signup, queue reservation, referrals 750 pts (paid after X link), X-connect opens before Epoch 1 close. Email-code signup = user task, low rating.",
+      "Gyndore (Base, GYND - NOW CONFIRMED 30 deg on airdrops.io 04.09): DropWave Season One CLOSED; reservation portal live UNTIL Sep 9, 2026 for S1 participants only (connect S1 wallet + X auth + confirm Base receiving address). Fresh wallets have NO allocation -> not eligible for us; Season Two not announced. Skip.",
+      "Beldex (own chain, BDX - NEW confirmed listing 04.09, 36 deg/0 deg rating): loyalty points program - wallet connect + X link, community tasks 50-100 pts, daily X post 20 pts, weekly check-in 20 pts, referrals. Conversion rate/pool/snapshot NOT announced; BDX trades since 2018 (KuCoin/Gate/Coinex). Wallet+X dashboard = user task, low quality signal.",
+      "DAC Quantum Chain (own L1, DACT - 0 deg, airdrop NOT officially confirmed): QE points testnet + Inception Wrapped recap + Interstellar Pass (required for mainnet access per team). $100k DACT 'Buzzdrop' on ChainGPT Pad until Sep 14 (register EVM wallet + X quests). Whitepaper: 5% of 1B supply = grant/community airdrop. Wallet-connect testnet = user task.",
+      "DeepBook (Sui, DEEP): Season 1 points claims LIVE - but eligibility = trading via margin-enabled DeepBook apps Jan 22-Apr 17 2026; our wallets have no SUI history -> not eligible, skip. New trading-app waitlist = email signup (referrals move queue).",
+      "Glider (a16z CSX $4M): DRIP Store (redeem beta points for roles/multipliers) open UNTIL Sep 6 (2 days left); beta points -> x7 at launch. Points accrue from deposits (1 pt/day/$) = capital-gated, skip.",
+      "DualMint UPTIME (DMT, Arbitrum/Base, unconfirmed 38 deg): Epoch 1 points campaign - email + 6-digit code signup, queue reservation, referrals 750 pts (paid after X link), X-connect opens before Epoch 1 close. Email-code signup = user task.",
     ],
     testnets: [
       {
         name: "Gyndore",
-        chain: "Base Sepolia (DEX)",
-        token: "GYND (NOT announced)",
-        confirmed: false,
-        status: "NEW 03.09 (airdrops.io 28 deg): free public testnet for a perp/DEX protocol. Onboarding mint per address per 24h: 1 cbBTC, 50,000 USDC, 25,000 GYND, 1,000 bGYND + community tokens. Test flows: swaps both directions, LP (narrow + full range), stake GYND/bGYND (USDC rewards accrue per block, no lockup), bGYND unbonding. Team: open testnet to find confusing flows before mainnet; no token allocation/snapshot announced. Gas = Base Sepolia ETH (Alchemy faucet).",
-        bot_able: "YES for on-chain loops (mint/swap/LP/stake via RPC) once Base Sepolia ETH gas is obtained; airdrop unconfirmed so low priority",
+        chain: "Base (perp/DEX)",
+        token: "GYND / bGYND",
+        confirmed: true,
+        status: "UPDATED 04.09: airdrops.io now lists CONFIRMED 30 deg, 'Claim Live 4d 20h remaining'. DropWave Season One CLOSED - Chips from wallet+social activity converted to GynPoints -> leaderboard for $GYND distribution. Reservation portal open UNTIL Sep 9, 2026 for Season One participants ONLY (connect the S1 wallet, X auth, confirm Base receiving address, submit). No fee. Fresh wallets have no allocation tied to them; Season Two NOT announced. Team: no fallback announced for unreserved allocations after 09.09.26.",
+        bot_able: "NO for us (no S1 activity -> zero allocation); was watchlisted 03.09 for testnet mint/swap loops (Base Sepolia) but those stopped mattering once S1 closed",
       },
       {
         name: "DualMint UPTIME",
@@ -58,7 +60,7 @@ export async function testnetStatus() {
         chain: "TBA (own chain)",
         token: "FLOP (~20% of supply to testnet participants, 10y vest)",
         confirmed: true,
-        status: "Confirmed. 100% fair launch (no presale, no VCs - Hayes 08.2026). Testnet opens Q4 2026, airdrop Q4 2026, genesis Q1 2027. Faucet will require decentralized identity (DID) keys - only DID-holding agents access it. Rating 159 deg on airdrops.io (03.09, top confirmed listing). Creator/KOL track pays $FLOP from audience-generated network activity; Substack counts. Tip: register multiple role forms (free, separate).",
+        status: "Confirmed. 100% fair launch (no presale, no VCs - Hayes 08.2026). Testnet opens Q4 2026, airdrop Q4 2026, genesis Q1 2027. Faucet will require decentralized identity (DID) keys - only DID-holding agents access it. Rating 142 deg on airdrops.io (04.09; slide 167->159->142 - engagement noise; still top of confirmed list below MINT casino). Creator/KOL track pays $FLOP from audience-generated network activity; Substack counts. Tip: register multiple role forms (free, separate).",
         bot_able: "testnet farm once live (Q4); DID key prep = key differentiator; role forms = Google Forms (human)",
       },
       {

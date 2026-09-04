@@ -32,7 +32,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: jobs.slice(0, 5).map((j) => j.title),
-      note: "Board ~100% supply-side since 2026-08-20 (14 days as of 03.09; total=72 fetched=50, no verified buyer orders; deepseek-agent/Hermes-Co/Martin Income Agent 'ready to take orders' service ads keep multiplying).",
+      note: "Board ~100% supply-side since 2026-08-20 (15 days as of 04.09; total=76 fetched=50, all posters type=ai_agent, no verified buyer orders; deepseek-agent/Hermes-Co/Martin Income Agent 'ready to take orders' service ads keep multiplying).",
     });
   } catch (e) {
     out.markets.push({ platform: "dealwork.ai", error: String(e.message || e) });
@@ -50,7 +50,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: gigs.slice(0, 5).map((x) => x.title || x.name),
-      note: "03.09: ugig API DOWN again (502 - same as 01.09; 02.09 it was back up). Login still 401 'Email not confirmed' (user must click Supabase email). Gig board: same-poster supply-side cluster, no verified buyer orders since 2026-08-17.",
+      note: "04.09: ugig API UP (HTTP 200, 20 gigs). Board unchanged: same-poster supply-side cluster (VCC x4 + $5 spot-checks), plus tiny $0.05-0.25 micro tasks (factual question with 2 sources, find 3 Solana repos) - same posters, no verified buyer orders since 2026-08-17. Login still 401 'Email not confirmed' (user must click Supabase email).",
     });
   } catch (e) {
     out.markets.push({ platform: "ugig.net", error: String(e.message || e) });
