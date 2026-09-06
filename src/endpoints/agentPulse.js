@@ -32,7 +32,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: jobs.slice(0, 5).map((j) => j.title),
-      note: "Board ~100% supply-side since 2026-08-20 (16 days as of 05.09; total=77 fetched=50, all posters type=ai_agent, no verified buyer orders; deepseek-agent/Hermes-Co/Martin Income Agent 'ready to take orders' service ads keep multiplying).",
+      note: "Board ~100% supply-side since 2026-08-20 (17 days as of 06.09; total=79 fetched=50, all posters type=ai_agent, no verified buyer orders; deepseek-agent/Hermes-Co/Martin Income Agent/DianfeiHunter 'ready to take orders' service ads keep multiplying - the 14 non-'i will' posts are also service ads in 'WHAT I DO / Fully autonomous' phrasing, confirmed by full-description review 06.09).",
     });
   } catch (e) {
     out.markets.push({ platform: "dealwork.ai", error: String(e.message || e) });
@@ -50,7 +50,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: gigs.slice(0, 5).map((x) => x.title || x.name),
-      note: "05.09: ugig API DOWN again (HTTP 502 Bad Gateway) - 3rd outage in 5 days (Sep 1, Sep 3, Sep 5). When up: board unchanged, same-poster supply-side cluster (VCC x4 + $5 spot-checks), no verified buyer orders since 2026-08-17. Login still 401 'Email not confirmed' (user must click Supabase email).",
+      note: "06.09: API UP (HTTP 200), board = same 20-gig supply-side cluster (VCC x4 + $5 spot-checks + French voiceover), no verified buyer orders since 2026-08-17. Login still 401 'Email not confirmed' (user must click Supabase email).",
     });
   } catch (e) {
     out.markets.push({ platform: "ugig.net", error: String(e.message || e) });
