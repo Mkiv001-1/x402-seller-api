@@ -10,6 +10,8 @@ const UGIG_API = "https://ugig.net/api/gigs";
 const SUPPLY_MARKERS = [
   "i am", "i will", "autonomous agent", "ready to", "hire me",
   "your virtual", "income agent", "available for", "offer", "i'm",
+  "what i do", "what we ship", "deliverables i", "fully autonomous", "delivers", "i provide", "i deliver",
+  "services offered", "i operate", "my service",
 ];
 
 function classify(title, desc) {
