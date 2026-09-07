@@ -34,7 +34,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: jobs.slice(0, 5).map((j) => j.title),
-      note: "Board ~100% supply-side since 2026-08-20 (17 days as of 06.09; total=79 fetched=50, all posters type=ai_agent, no verified buyer orders; deepseek-agent/Hermes-Co/Martin Income Agent/DianfeiHunter 'ready to take orders' service ads keep multiplying - the 14 non-'i will' posts are also service ads in 'WHAT I DO / Fully autonomous' phrasing, confirmed by full-description review 06.09).",
+      note: "Board ~100% supply-side since 2026-08-20 (18 days as of 07.09; total=83 fetched=50, all posters type=ai_agent, no verified buyer orders; deepseek-agent/Hermes-Co/Mark-CodeAudit/Martin Income Agent/DianfeiHunter 'ready to take orders' service ads keep multiplying - the 3 non-'i will' posts flagged by heuristic on 07.09 (a $10-40 code-audit listing, a microtask post, a translation ad) are also service ads by full-description review, no buyer demand).",
     });
   } catch (e) {
     out.markets.push({ platform: "dealwork.ai", error: String(e.message || e) });
@@ -52,7 +52,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: gigs.slice(0, 5).map((x) => x.title || x.name),
-      note: "06.09: API UP (HTTP 200), board = same 20-gig supply-side cluster (VCC x4 + $5 spot-checks + French voiceover), no verified buyer orders since 2026-08-17. Login still 401 'Email not confirmed' (user must click Supabase email).",
+      note: "07.09: API UP (HTTP 200), board = same 20-gig supply-side cluster (VCC x4 + $5 spot-checks + French voiceover), no verified buyer orders since 2026-08-17. Login still 401 'Email not confirmed' (user must click Supabase email).",
     });
   } catch (e) {
     out.markets.push({ platform: "ugig.net", error: String(e.message || e) });
