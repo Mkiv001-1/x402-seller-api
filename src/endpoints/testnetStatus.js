@@ -1,15 +1,15 @@
 // Endpoint: verified testnet airdrop landscape (unique curated data from Money Agent RU research)
-// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-09-07.
+// Sources: airdrops.io, project docs, on-chain recon. Updated 2026-09-08.
 
 export async function testnetStatus() {
   return {
     generated_at: new Date().toISOString(),
-    updated: "2026-09-07",
+    updated: "2026-09-08",
     note: "Independently verified by Money Agent RU (airdrops.io + official docs + on-chain RPC checks). Not financial advice.",
     watchlist: [
-      "BOARD 07.09: composition UNCHANGED for the THIRD day (06->07.09) - no new bot-able campaigns. Beldex keeps the Confirmed tag with the tracker-card rating split persisting (85 deg on /confirmed vs 73 deg on /latest as of 07.09) - weak either way (BDX traded since 2018, no conversion/pool/snapshot announced; loyalty points + daily X posts = user task). Gyndore claim-live 1d 20h remaining (reservation closes ~Sep 9) - Season-One participants only, skip stands for fresh wallets. Dow Protocol 209 deg yesterday = X-post + referral, token NOT confirmed (noise, dropped from watch). Flop Labs ~128-130 deg (still top confirmed below MINT casino), TBook 150-154, Nowa ~181, Push 175, Sweep 164, Amadeus (board Sep 9, unrated), DualMint 26-31, MINT 223-226 (casino, skip). Drake: $100k Monad-activity campaign opens TODAY Sep 7 - testnet/trading/bounty/role tasks; trading = capital, X/role = user. Nothing is API-bot-able end-to-end; Omega claim bot remains the only fully scriptable confirmed farm, still waiting on ~$3 gas (SOL=0 confirmed again 07.09).",
-      "Gyndore (Base, GYND - CONFIRMED, 63-80 deg 07.09): DropWave Season One CLOSED; reservation portal live UNTIL Sep 9, 2026 (claim-live 1d 20h remaining as of 07.09) for S1 participants only (connect S1 wallet + X auth + confirm Base receiving address). Fresh wallets have NO allocation -> not eligible for us; Season Two not announced. Skip.",
-      "Beldex (own chain, BDX - confirmed listing, 85 deg /confirmed vs 73 deg /latest 07.09): loyalty points program - wallet connect + X link, community tasks 50-100 pts, daily X post 20 pts, weekly check-in 20 pts, referrals. Conversion rate/pool/snapshot NOT announced; BDX trades since 2018 (KuCoin/Gate/Coinex). Wallet+X dashboard = user task, low quality signal.",
+      "BOARD 08.09: composition UNCHANGED for the FOURTH day - no new bot-able campaigns. Beldex rating split finally resolved but downward: 21 deg on BOTH /confirmed and /latest (was 85/73 on 07.09) - weak either way (BDX traded since 2018, no conversion/pool/snapshot announced; loyalty points + daily X posts = user task). Gyndore claim-live 20h 56m remaining (reservation closes ~Sep 9) - Season-One participants only, skip stands for fresh wallets; no Season Two announced. Amadeus updated 08.09 'New Quests has been launched' - still 2-wallet browser link per quest = user (board Sep 9, season to Oct 12). Dow re-listed 202 deg on /latest (X-post + referrals, no token = noise). New /latest all skips: Vangrid (app + video = user), Entropy 23 deg (deposit), Reels 211 deg (casino), C8ntinuum (SIWE anti-bot). Fortune Foes NFT sale moved to Sep 15 (paid mint 0.002 ETH = capital). Flop ~133 deg (still top confirmed below MINT casino 220), TBook 147, Nowa 178, Push 171, Sweep 164, MINT 220 (casino, skip). Drake $100k Monad opened Sep 7 = user (trading = capital). Nothing is API-bot-able end-to-end; Omega claim bot remains the only fully scriptable confirmed farm, still waiting on ~$3 gas (SOL=0 confirmed again 08.09). x402 Arena (Season 0) live: open POST /register for x402 endpoints, 508 agents / ~$109 rev / 81 buyers - supply-heavy, top-15 = operator-test lookalikes; sales channel for us once hosting + Base gas approved.",
+      "Gyndore (Base, GYND - CONFIRMED, 27 deg 08.09): DropWave Season One CLOSED; reservation portal live UNTIL Sep 9, 2026 (claim-live 20h 56m remaining as of 08.09) for S1 participants only (connect S1 wallet + X auth + confirm Base receiving address). Fresh wallets have NO allocation -> not eligible for us; Season Two not announced. Skip.",
+      "Beldex (own chain, BDX - confirmed listing, 21 deg on BOTH cards 08.09, split resolved downward from 85/73): loyalty points program - wallet connect + X link, community tasks 50-100 pts, daily X post 20 pts, weekly check-in 20 pts, referrals. Conversion rate/pool/snapshot NOT announced; BDX trades since 2018 (KuCoin/Gate/Coinex). Wallet+X dashboard = user task, low quality signal.",
       "DAC Quantum Chain (own L1, DACT - 0 deg, airdrop NOT officially confirmed): QE points testnet + Inception Wrapped recap + Interstellar Pass (required for mainnet access per team). $100k DACT 'Buzzdrop' on ChainGPT Pad until Sep 14 (register EVM wallet + X quests). Whitepaper: 5% of 1B supply = grant/community airdrop. Wallet-connect testnet = user task.",
       "DeepBook (Sui, DEEP): Season 1 points claims LIVE - but eligibility = trading via margin-enabled DeepBook apps Jan 22-Apr 17 2026; our wallets have no SUI history -> not eligible, skip. New trading-app waitlist = email signup (referrals move queue).",
       "Glider (a16z CSX $4M): DRIP Store (redeem beta points for roles/multipliers) open UNTIL Sep 6 (2 days left); beta points -> x7 at launch. Points accrue from deposits (1 pt/day/$) = capital-gated, skip.",
@@ -53,7 +53,7 @@ export async function testnetStatus() {
         chain: "own L1 (confidential AI agents)",
         token: "AMA (1B hard cap, no premine)",
         confirmed: true,
-        status: "New verified 30.08 (usethebitcoin + amahub.ama.one + cryptorank). PRIME points Season 1 -> $AMA airdrop, TGE targeted September 2026. Every quest requires linking a chain wallet + Amadeus wallet (browser ext) by signature - not API-automatable. Social quests closed Aug 31, board Sep 9, season Oct 12. Free parts: check-in +5/day, +100/day post, wallet creation +50, @username +50.",
+        status: "New verified 30.08 (usethebitcoin + amahub.ama.one + cryptorank). PRIME points Season 1 -> $AMA airdrop, TGE targeted September 2026. Every quest requires linking a chain wallet + Amadeus wallet (browser ext) by signature - not API-automatable. Social quests closed Aug 31, board Sep 9, season Oct 12. UPDATED 08.09: 'New Quests has been launched' on airdrops.io - check-in +5/day, +100/day post, wallet creation +50, @username +50 still free; all quests need the 2-wallet browser link.",
         bot_able: "NO (2-wallet browser link required); free quests are user tasks",
       },
       {
@@ -69,7 +69,7 @@ export async function testnetStatus() {
         chain: "Solana + Base + Ethereum (+Aptos)",
         token: "pOmega -> token at TGE (not announced)",
         confirmed: true,
-        status: "Pre-claim LIVE: 0.003 SOL or ~0.0000957 ETH -> 100 pOmega, no captcha, no claim cap. airdrops.io status Ongoing+Confirmed. Live API check 07.09: all 5 farm wallets still enabled, claimed=false, SOL balance 0 - the only blocker is ~$3 of gas. DEX pOmega/mUSDC live.",
+        status: "Pre-claim LIVE: 0.003 SOL or ~0.0000957 ETH -> 100 pOmega, no captcha, no claim cap. airdrops.io status Ongoing+Confirmed. Live API check 08.09: all 5 farm wallets still enabled, claimed=false, SOL balance 0 - the only blocker is ~$3 of gas. DEX pOmega/mUSDC live. Note: third-party recap (bittime) reminds Olympus has not confirmed a major TGE - pOmega conversion is a team statement, position size accordingly.",
         bot_able: "YES - fully scriptable (omega_claim.py), needs gas",
       },
       {
