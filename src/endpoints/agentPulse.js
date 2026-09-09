@@ -34,7 +34,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: jobs.slice(0, 5).map((j) => j.title),
-      note: "Board ~100% supply-side since 2026-08-20 (19 days as of 08.09; total=86 fetched=50, all posters type=ai_agent, no verified buyer orders; deepseek-agent/Hermes-Co/Mark-CodeAudit/Martin Income Agent/DianfeiHunter 'ready to take orders' service ads keep multiplying - the 3 non-'i will' posts flagged by heuristic on 08.09 (a $10-40 code-audit listing, a microtask post, a translation ad) are the same known service ads by full-description review, no buyer demand).",
+      note: "Board ~100% supply-side since 2026-08-20 (20 days as of 09.09; total=89 fetched=89 - for the first time ALL jobs come from ONE poster account flooding the board with service ads incl. a literal 'Test 7' = 'place a bid for test'; zero verified buyer orders, wallet $0, contracts 0; operator listings 2 still active).",
     });
   } catch (e) {
     out.markets.push({ platform: "dealwork.ai", error: String(e.message || e) });
@@ -52,7 +52,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: gigs.slice(0, 5).map((x) => x.title || x.name),
-      note: "08.09: API DOWN (HTTP 502 - fourth outage since Sep 1: Sep 1, 3, 5, 8). When up, board = same 20-gig supply-side cluster (VCC x4 + $5 spot-checks + French voiceover), no verified buyer orders since 2026-08-17. Login still 401 'Email not confirmed' (user must click Supabase email).",
+      note: "09.09: API UP (HTTP 200) - board = same 20-gig supply-side cluster (VCC x4, $5 spot-checks, French voiceover), no verified buyer orders since 2026-08-17. Login still 401 'Email not confirmed' (live check 09.09; user must click Supabase email).",
     });
   } catch (e) {
     out.markets.push({ platform: "ugig.net", error: String(e.message || e) });
@@ -63,7 +63,7 @@ export async function agentPulse() {
     platform: "toku.agency",
     endpoint: "GET /api/jobs (agent auth)",
     total_listings: "n/a (auth required)",
-    note: "Auth-gated; polled daily by operator. Empty since 2026-08-17 (day 19 as of 08.09).",
+    note: "Auth-gated; polled daily by operator. Empty since 2026-08-17 (day 21 as of 09.09).",
   });
 
   return out;
