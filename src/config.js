@@ -12,9 +12,15 @@ export const config = {
   evmAddress: process.env.PAYTO_EVM || "0xD4D124D375775a146218dBD8243A2d17ba540596",
   svmAddress: process.env.PAYTO_SOL || "3DNVJvjEx5pjiy7hJb3QanLm4N3kWN2nLQVLTryXpQNx",
 
-  facilitator: TESTNET
-    ? { url: "https://x402.org/facilitator" } // works on Base Sepolia + Solana devnet
-    : { url: "https://x402.org/facilitator" }, // mainnet facilitator
+  // Facilitator = the service that verifies+settles x402 payments on our behalf.
+  // PayAI (https://facilitator.payai.network) supports Base MAINNET (eip155:8453) and
+  // Solana mainnet with NO API keys, covers network fees (gasless), and auto-lists the
+  // merchant in the x402 Bazaar (https://facilitator.payai.network -> Auto-Discovery).
+  // This replaces x402.org/facilitator, which serves TESTNETS ONLY (no eip155:8453),
+  // so real-USDC mainnet was previously impossible without a Coinbase CDP API key.
+  facilitator: {
+    url: process.env.FACILITATOR_URL || "https://facilitator.payai.network",
+  },
 
   // CAIP-2 network identifiers
   evmNetwork: TESTNET ? "eip155:84532" : "eip155:8453", // Base Sepolia / Base

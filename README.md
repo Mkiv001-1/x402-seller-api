@@ -32,22 +32,40 @@ npm test
 curl -i http://localhost:4021/v1/funding/apy   # ожидаем HTTP 402 + payment-заголовки
 ```
 
-## Деплой
+## Деплой — РАБОТАЕТ (10.09.2026): публичный URL + авто-регистрация
 
-Локально + Cloudflare quick tunnel (бесплатно, без аккаунта):
+Публичный origin (СТАБИЛЬНЫЙ, бесплатно, без аккаунтов):
+`https://mi-desktop.rainbow-dab.ts.net:10000` → Tailscale Funnel → `127.0.0.1:4021`.
+Tailscale уже установлен и авторизован на хосте (`mi-desktop`), Funnel даёт постоянный
+HTTPS-ingress без проброса портов:
+
 ```bash
-cloudflared tunnel --url http://localhost:4021
-# получить URL вида https://xxx.trycloudflare.com -> зарегистрировать в Bazaar
+tailscale funnel --bg --https=10000 4021     # публичный HTTPS -> локальный сервер
+python keepalive.py                          # держит node-сервер + funnel живыми
 ```
 
-Платный хостинг (стабильный URL, рекомендуется после валидации):
-- Railway $5/мес (git-деплой, Dockerfile приложен)
-- Render free tier (спит после 15 мин idle — для 402-флоу лучше paid)
-- Vercel/Cloudflare Workers (нужна адаптация middleware, см. docs.x402.org)
+Персистентность (без admin-прав — ONLOGON-таск требует elevation и был отклонён):
+- `MoneyAgentX402Ensure` — Windows Task Scheduler, каждые 20 мин: `keepalive.bat --ensure`
+- `%APPDATA%\...\Startup\money_agent_x402.bat` — авто-старт демона при входе в систему
 
-## Регистрация в Bazaar (дискавери)
+Cloudflared quick-tunnel (`cloudflared tunnel --url ...`) — работает, но hostname
+меняется при каждом рестарте, а x402 Arena НЕ умеет обновлять endpoint (create-only,
+409 "Agent name already taken"). Поэтому выбран Tailscale Funnel.
 
-Листинг уже объявлен через `declareDiscoveryExtension` в route-конфиге — при работе через x402.org/facilitator эндпоинты автоматически видны в x402scan. Дополнительно: https://www.x402scan.com/resources/register
+## Регистрация в дискавери
+
+- **x402 Arena** (`https://core.x402arena.gg/register`) — открытый реестр, POST без одобрения,
+  сам проверяет endpoint на валидный 402. Зарегистрированы все 6 эндпоинтов (verified=true).
+- **PayAI facilitator** (`https://facilitator.payai.network`) — `Auto-Discovery`: мерчант
+  автоматически попадает в x402 Bazaar (extension `bazaar` уже в 402-ответе).
+- Ручная регистрация origin в x402scan Bazaar (`x402scan.com/api/x402/registry/register-origin`)
+  требует SIWX-подписи владельца — не нужна, т.к. Bazaar-листинг идёт через PayAI.
+
+## Фасилитатор (vaжно)
+
+`x402.org/facilitator` обслуживает ТОЛЬКО тестнеты (нет `eip155:8453`) — с ним mainnet
+невозможен без CDP-ключа. Переключено на **PayAI**: Base mainnet `eip155:8453` и Solana
+mainnet, без API-ключей, сетевые комиссии покрыты (gasless), 1000 бесплатных сеттлментов.
 
 ## Кошельки (приём USDC)
 
