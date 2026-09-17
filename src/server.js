@@ -16,6 +16,7 @@ import * as testnetStatus from "./endpoints/testnetStatus.js";
 import * as defiYields from "./endpoints/defiYields.js";
 import * as githubTrending from "./endpoints/githubTrending.js";
 import * as agentPulse from "./endpoints/agentPulse.js";
+import * as evmPreflightMod from "./endpoints/evmPreflight.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -78,6 +79,29 @@ const routes = {
     null,
     { markets: [{ platform: "dealwork.ai", total_listings: 20, supply_side: 17 }] }
   ),
+  "GET /v1/evm/preflight": accept(
+    config.prices.evmPreflight,
+    evmPreflightMod.meta.description,
+    {
+      properties: {
+        chain: { type: "string", description: "base|ethereum|arbitrum|optimism|polygon|bsc|all (default base)" },
+        tokens: { type: "string", description: "comma-separated ERC-20 addresses to resolve (max 10)" },
+      },
+    },
+    {
+      chains: [
+        {
+          chain: "base",
+          chain_id: 8453,
+          gas_price_gwei: 0.006,
+          native_symbol: "ETH",
+          native_usd: 2446.77,
+          est_tx_cost: { native_transfer: { gas_units: 21000, native_fee: 1.26e-7, usd: 0.00031 } },
+        },
+      ],
+      tokens: [{ address: "0x8335...", symbol: "USDC", decimals: 6, name: "USD Coin" }],
+    }
+  ),
 };
 
 app.use(paymentMiddleware(routes, resourceServer));
@@ -102,9 +126,9 @@ const openapi = {
     title: "Money Agent RU Data API",
     version: "0.1.0",
     description:
-      "Pay-per-request data endpoints for AI agents: crypto prices, Bybit funding APY, verified testnet airdrop landscape, DeFi stablecoin yields, GitHub trending, agent-economy market pulse. Pay with USDC on Base via x402 - no API keys, no registration.",
+      "Pay-per-request data endpoints for AI agents: crypto prices, Bybit funding APY, verified testnet airdrop landscape, DeFi stablecoin yields, GitHub trending, agent-economy market pulse, and an EVM tx preflight (gas + USD cost + ERC-20 metadata). Pay with USDC on Base via x402 - no API keys, no registration.",
     "x-guidance":
-      "All endpoints are GET, paid via x402 (HTTP 402 challenge). Request any endpoint without payment to receive a 402 + PAYMENT-REQUIRED header with exact instructions. Pay in USDC on Base (eip155:8453) or USDC on Solana. Endpoints return JSON. /v1/funding/apy is unique live Bybit perp funding APY data; /v1/testnet/status is a curated verified airdrop landscape; /v1/agent/pulse is a live supply-vs-demand read across AI-agent marketplaces (unique). Cache-friendly: data refreshed every 60s.",
+      "All endpoints are GET, paid via x402 (HTTP 402 challenge). Request any endpoint without payment to receive a 402 + PAYMENT-REQUIRED header with exact instructions. Pay in USDC on Base (eip155:8453) or USDC on Solana. Endpoints return JSON. /v1/evm/preflight ($0.002) is the cheap runtime primitive: call it before every transaction to get live gas, the USD cost of a transfer/approve/swap on 6 chains, and ERC-20 decimals/symbol for any address. /v1/funding/apy is unique live Bybit perp funding APY data; /v1/testnet/status is a curated verified airdrop landscape; /v1/agent/pulse is a live supply-vs-demand read across AI-agent marketplaces (unique). Cache-friendly: data refreshed every 60s.",
     contact: { email: "michael.ivanov.tm@gmail.com" },
   },
   paths: {},
@@ -168,6 +192,28 @@ openapi.paths["/v1/github/trending"] = {
 openapi.paths["/v1/agent/pulse"] = {
   get: pathSchema("Agent-economy market pulse", "agentPulse", agentPulse.meta.description, config.prices.agentPulse),
 };
+openapi.paths["/v1/evm/preflight"] = {
+  get: pathSchema(
+    "EVM tx preflight (gas, USD cost, ERC-20 metadata)",
+    "evmPreflight",
+    evmPreflightMod.meta.description,
+    config.prices.evmPreflight,
+    {
+      type: "object",
+      properties: {
+        chain: { type: "string", description: "base|ethereum|arbitrum|optimism|polygon|bsc|all" },
+        tokens: { type: "string", description: "comma-separated ERC-20 addresses" },
+      },
+    },
+    {
+      type: "object",
+      properties: {
+        chains: { type: "array", items: { type: "object" } },
+        tokens: { type: "array", items: { type: "object" } },
+      },
+    }
+  ),
+};
 
 app.get("/openapi.json", (_req, res) => res.json(openapi));
 
@@ -208,6 +254,14 @@ app.get("/v1/github/trending", async (_req, res) => {
 app.get("/v1/agent/pulse", async (_req, res) => {
   try { res.json(await agentPulse.agentPulse()); }
   catch (e) { res.status(502).json({ error: "upstream failed", detail: e.message }); }
+});
+
+app.get("/v1/evm/preflight", async (req, res) => {
+  try {
+    res.json(await evmPreflightMod.evmPreflight({ chain: req.query.chain || "base", tokens: req.query.tokens || "" }));
+  } catch (e) {
+    res.status(502).json({ error: "upstream failed", detail: e.message });
+  }
 });
 
 // 404 for everything else

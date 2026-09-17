@@ -44,6 +44,8 @@ AGENTS = [
      "Stablecoin DeFi yield pools on Base/Ethereum (DefiLlama): APY, TVL."),
     ("moneyagentru-github-trending", "/v1/github/trending", "developer-tools",
      "GitHub trending repositories, 7-day window."),
+    ("moneyagentru-evm-preflight", "/v1/evm/preflight", "crypto-infrastructure",
+     "Cheap runtime primitive for on-chain agents ($0.002): live gas price, block height, native-token USD price and the estimated USD cost of a native transfer / ERC-20 approve / swap on Base, Ethereum, Arbitrum, Optimism, Polygon and BSC - plus ERC-20 symbol/decimals/name resolution (?tokens=0x...)."),
 ]
 
 

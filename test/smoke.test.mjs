@@ -11,13 +11,16 @@ const PORT = 4299;
 const BASE = `http://127.0.0.1:${PORT}`;
 const PAYTO = "0xD4D124D375775a146218dBD8243A2d17ba540596";
 
+// prices repriced 2026-09-17 (market recon: x402 volume sits on cheap runtime
+// primitives) and /v1/evm/preflight added as the $0.002 runtime primitive.
 const EXPECTED = {
-  "/v1/crypto/prices": ["20000", "0.02"],
+  "/v1/crypto/prices": ["10000", "0.01"],
   "/v1/funding/apy": ["50000", "0.05"],
   "/v1/testnet/status": ["30000", "0.03"],
-  "/v1/defi/yields": ["30000", "0.03"],
-  "/v1/github/trending": ["20000", "0.02"],
-  "/v1/agent/pulse": ["50000", "0.05"],
+  "/v1/defi/yields": ["20000", "0.02"],
+  "/v1/github/trending": ["10000", "0.01"],
+  "/v1/agent/pulse": ["30000", "0.03"],
+  "/v1/evm/preflight": ["2000", "0.002"],
 };
 
 let server;
@@ -66,10 +69,10 @@ test("healthz reports testnet mode", async () => {
   assert.equal(d.testnet, true);
 });
 
-test("openapi.json: 6 paid paths with x-payment-info", async () => {
+test("openapi.json: 7 paid paths with x-payment-info", async () => {
   const d = await (await fetch(`${BASE}/openapi.json`)).json();
   assert.equal(d.info.title, "Money Agent RU Data API");
-  assert.equal(Object.keys(d.paths).length, 6);
+  assert.equal(Object.keys(d.paths).length, 7);
   for (const [p, [, price]] of Object.entries(EXPECTED)) {
     const op = d.paths[p].get;
     assert.ok(op["x-payment-info"], `${p} missing x-payment-info`);
@@ -88,5 +91,16 @@ test("all routes return 402 with correct payTo + atomic-unit amounts", async () 
 
 test("root endpoint lists all paid endpoints", async () => {
   const d = await (await fetch(`${BASE}/`)).json();
-  assert.equal(d.endpoints.length, 6);
+  assert.equal(d.endpoints.length, 7);
+});
+
+test("evm/preflight handler resolves live gas + ERC-20 metadata (business logic)", async () => {
+  const { evmPreflight } = await import("../src/endpoints/evmPreflight.js");
+  const r = await evmPreflight({ chain: "base", tokens: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" });
+  assert.equal(r.chains.length, 1);
+  assert.equal(r.chains[0].chain_id, 8453);
+  assert.ok(Number.isFinite(r.chains[0].gas_price_gwei), "gas price is numeric");
+  assert.ok(Number.isFinite(r.chains[0].est_tx_cost.native_transfer.usd), "usd cost is numeric");
+  assert.equal(r.tokens[0].symbol, "USDC");
+  assert.equal(r.tokens[0].decimals, 6);
 });
