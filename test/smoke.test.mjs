@@ -104,3 +104,29 @@ test("evm/preflight handler resolves live gas + ERC-20 metadata (business logic)
   assert.equal(r.tokens[0].symbol, "USDC");
   assert.equal(r.tokens[0].decimals, 6);
 });
+
+// Regression: a verifier harness boots the app while the live origin already owns
+// 4021. `--port` must win over the default so the harness gets a clean boot on its
+// own port instead of EADDRINUSE (this is what broke `hermes verify`).
+test("--port CLI flag overrides the default port", async () => {
+  const PORT2 = 4298;
+  const proc = spawn(process.execPath, ["src/server.js", "--port", String(PORT2)], {
+    cwd: path.join(__dirname, ".."),
+    env: { ...process.env, NODE_ENV: "test" },
+    stdio: "ignore",
+  });
+  try {
+    const deadline = Date.now() + 20000;
+    let body = null;
+    while (Date.now() < deadline && !body) {
+      try {
+        body = await (await fetch(`http://127.0.0.1:${PORT2}/healthz`)).json();
+      } catch {
+        await sleep(300);
+      }
+    }
+    assert.equal(body?.testnet, true, `app did not come up on --port ${PORT2}`);
+  } finally {
+    proc.kill();
+  }
+});

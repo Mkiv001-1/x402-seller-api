@@ -4,9 +4,22 @@
 
 const TESTNET = process.env.NODE_ENV === "test";
 
+// Port precedence: --port=<n> / --port <n>  >  PORT env  >  4021.
+// The CLI form exists so a verifier harness can boot the app on its own port
+// (.hermes/environment.json uses 4022) without colliding with the live server.
+function cliPort() {
+  const argv = process.argv.slice(2);
+  for (let i = 0; i < argv.length; i++) {
+    const eq = argv[i].match(/^--port=(\d+)$/);
+    if (eq) return parseInt(eq[1], 10);
+    if (argv[i] === "--port" && argv[i + 1] && /^\d+$/.test(argv[i + 1])) return parseInt(argv[i + 1], 10);
+  }
+  return null;
+}
+
 export const config = {
   testnet: TESTNET,
-  port: parseInt(process.env.PORT || "4021", 10),
+  port: cliPort() ?? parseInt(process.env.PORT || "4021", 10),
 
   // Receiving wallet addresses (same keys as airdrop farm wallets)
   evmAddress: process.env.PAYTO_EVM || "0xD4D124D375775a146218dBD8243A2d17ba540596",

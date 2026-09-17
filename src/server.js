@@ -271,4 +271,15 @@ app.listen(config.port, () => {
   console.log(`[x402-seller] ${config.testnet ? "TESTNET (Base Sepolia)" : "MAINNET (Base)"} listening on :${config.port}`);
   console.log(`[x402-seller] receiving USDC at ${config.evmAddress} (${config.evmNetwork})`);
   console.log(`[x402-seller] protected routes: ${Object.keys(routes).join(", ")}`);
+}).on("error", (err) => {
+  // This service is a singleton: the live origin owns 4021 and keepalive.py keeps it
+  // there. A SECOND boot (test harness / verifier / stale keepalive restart) must not
+  // crash-loop the way it used to - it falls back to the verifier port and says so.
+  const fallback = parseInt(process.env.PORT_FALLBACK || "4022", 10);
+  if (err.code === "EADDRINUSE" && config.port !== fallback) {
+    console.log(`[x402-seller] :${config.port} is taken by the live origin; falling back to :${fallback} (verifier mode)`);
+    app.listen(fallback, () => console.log(`[x402-seller] listening on :${fallback}`));
+    return;
+  }
+  throw err;
 });
