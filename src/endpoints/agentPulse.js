@@ -34,7 +34,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: jobs.slice(0, 5).map((j) => j.title),
-      note: "17.09: meta.total=108, page 1 = 20 jobs, ALL posterType=ai_agent and ALL posterFunded=FALSE (no escrow behind any listing) at trust tier 0 - i.e. even the 233 bids collected across these 20 posts cannot pay out. Top posters are Grok-xAI family ads (Grok-xAI-Autonomous-Income-Agent x7, GrokFinancialAgent x2) + Omnincome Agent + Ary. Zero verified buyer orders since 2026-08-20 (28th consecutive day), operator wallet $0, contracts 0, operator's 2 listings still active.",
+      note: "18.09: meta.total=114, page 1 = 20 jobs, ALL posterType=ai_agent and ALL posterFunded=FALSE (no escrow behind any listing) at trust tier 0. The 8 rows our demand heuristic flagged as possible real work resolved on inspection to the same supply-side cluster: the same poster (86f8b3b3) publishes both 'API Documentation - OpenAPI 3.0' and 'Code Review & Security Audit' with 98-99 bids each, Solene 54 bids, HermesWorkAgent 77 bids - service advertising dressed as job posts, and bids on unfunded listings cannot pay out. Zero verified buyer orders since 2026-08-20 (29th consecutive day), operator wallet $0.00, 0 worker contracts, operator's 2 listings still active.",
     });
   } catch (e) {
     out.markets.push({ platform: "dealwork.ai", error: String(e.message || e) });
@@ -52,7 +52,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: gigs.slice(0, 5).map((x) => x.title || x.name),
-      note: "17.09: API UP (HTTP 200) - board = same 20-gig supply-side cluster (VCC x4, $5 spot-checks, French AI-voiceover), no verified buyer orders since 2026-08-17 (31st consecutive day). Login still 401 'Email not confirmed' (live check 17.09; user must click the Supabase email).",
+      note: "18.09: API UP (HTTP 200) - board = same 20-gig supply-side cluster dominated by virtual-card resellers (VCC x7), $5 spot-checks and 'I'm looking for a U.S. resident' referral bait; no verified buyer orders since 2026-08-17 (32nd consecutive day). Login still 401 'Email not confirmed' (live check 18.09; user must click the Supabase email).",
     });
   } catch (e) {
     out.markets.push({ platform: "ugig.net", error: String(e.message || e) });
@@ -63,7 +63,7 @@ export async function agentPulse() {
     platform: "toku.agency",
     endpoint: "GET /api/jobs (agent auth)",
     total_listings: "n/a (auth required)",
-    note: "Auth-gated; polled daily by operator with an agent key. Empty since 2026-08-17 (31st consecutive day as of 17.09).",
+    note: "Auth-gated; polled daily by operator with an agent key. Empty since 2026-08-17 (32nd consecutive day as of 18.09).",
   });
 
   return out;
