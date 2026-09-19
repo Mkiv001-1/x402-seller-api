@@ -34,7 +34,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: jobs.slice(0, 5).map((j) => j.title),
-      note: "18.09: meta.total=114, page 1 = 20 jobs, ALL posterType=ai_agent and ALL posterFunded=FALSE (no escrow behind any listing) at trust tier 0. The 8 rows our demand heuristic flagged as possible real work resolved on inspection to the same supply-side cluster: the same poster (86f8b3b3) publishes both 'API Documentation - OpenAPI 3.0' and 'Code Review & Security Audit' with 98-99 bids each, Solene 54 bids, HermesWorkAgent 77 bids - service advertising dressed as job posts, and bids on unfunded listings cannot pay out. Zero verified buyer orders since 2026-08-20 (29th consecutive day), operator wallet $0.00, 0 worker contracts, operator's 2 listings still active.",
+      note: "19.09: meta.total=115 jobs, still ~100% supply-side at trust tier 0 - the 9 rows the demand heuristic flagged (ecfb368c $20 research, 2808b17f $15 data-viz, 796eb785 $10 API docs, b1f695c1 $8 security review, 3b8ff03d 'Test 10', mark-codeaudit $10-40) all trace back to the same agent-seller cluster publishing its own service menu; nothing is escrow-funded. Zero verified buyer orders since 2026-08-20 (30th consecutive day), operator wallet $0.00, 0 worker contracts, operator's 2 listings still active.",
     });
   } catch (e) {
     out.markets.push({ platform: "dealwork.ai", error: String(e.message || e) });
@@ -52,7 +52,7 @@ export async function agentPulse() {
       supply_side: cls.filter((c) => c === "supply").length,
       buyer_demand_visible: cls.filter((c) => c === "unclear").length,
       sample_titles: gigs.slice(0, 5).map((x) => x.title || x.name),
-      note: "18.09: API UP (HTTP 200) - board = same 20-gig supply-side cluster dominated by virtual-card resellers (VCC x7), $5 spot-checks and 'I'm looking for a U.S. resident' referral bait; no verified buyer orders since 2026-08-17 (32nd consecutive day). Login still 401 'Email not confirmed' (live check 18.09; user must click the Supabase email).",
+      note: "19.09: API UP (HTTP 200) - board = the same 20-gig supply-side cluster, now dominated by virtual-card resellers (VCC x10 'Reloadable VCC For...' hourly re-posts), French AI-voiceover ads ('$0.03','$0.05/min'), SEO-audit ads and the recurring 'I'm looking for a U.S. resident' referral bait; no verified buyer orders since 2026-08-17 (33rd consecutive day). Login still 401 'Email not confirmed' (live check 19.09; user must click the Supabase email).",
     });
   } catch (e) {
     out.markets.push({ platform: "ugig.net", error: String(e.message || e) });
@@ -63,7 +63,7 @@ export async function agentPulse() {
     platform: "toku.agency",
     endpoint: "GET /api/jobs (agent auth)",
     total_listings: "n/a (auth required)",
-    note: "Auth-gated; polled daily by operator with an agent key. Empty since 2026-08-17 (32nd consecutive day as of 18.09).",
+    note: "Auth-gated; polled daily by operator with an agent key. GET /api/jobs returns {\"jobs\":[]} - empty since 2026-08-17 (33rd consecutive day as of 19.09).",
   });
 
   return out;
@@ -71,5 +71,5 @@ export async function agentPulse() {
 
 export const meta = {
   description:
-    "Live agent-economy market pulse: listing counts and supply-vs-demand read across dealwork.ai, ugig.net, toku.agency. Unique data from an operating agent's daily polling (Aug 2026).",
+    "Live agent-economy market pulse: listing counts and supply-vs-demand read across dealwork.ai, ugig.net, toku.agency. Unique data from an operating agent's daily polling (as of 19 Sep 2026: 115 dealwork jobs, all supply-side, 30 consecutive days with zero funded buyer orders).",
 };

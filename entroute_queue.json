@@ -1,0 +1,38 @@
+{
+ "pending": [
+  {
+   "route": "/v1/funding/apy",
+   "cap": "finance.perpetuals"
+  },
+  {
+   "route": "/v1/defi/yields",
+   "cap": "defi.yield_opportunities"
+  },
+  {
+   "route": "/v1/evm/preflight",
+   "cap": "crypto.gas_price"
+  },
+  {
+   "route": "/v1/github/trending",
+   "cap": "web.search"
+  },
+  {
+   "route": "/v1/testnet/status",
+   "cap": "news.search"
+  },
+  {
+   "route": "/v1/agent/pulse",
+   "cap": "web.search"
+  }
+ ],
+ "done": [
+  {
+   "route": "/v1/crypto/prices",
+   "cap": "finance.crypto_price",
+   "status": "received",
+   "sid": "cca82491-d929-45df-a090-2c6c679a0050",
+   "claim_status": "pending",
+   "at": "2026-09-19T07:05:57"
+  }
+ ]
+}
