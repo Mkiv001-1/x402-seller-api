@@ -70,6 +70,12 @@ ENDPOINTS = [
         "description": "Runtime preflight before an EVM transaction: live gas price, block height, USD cost of transfer/approve/swap on 6 chains plus ERC-20 symbol/decimals/name.",
         "price_per_call": 0.002,
     },
+    {
+        "url": ORIGIN + "/v1/prediction/markets",
+        "display_name": "Live prediction-market odds (Polymarket)",
+        "description": "Live prediction-market odds with implied probability per outcome, executable bid/ask band, spread, liquidity and 24h/1w/1m drift, across the whole Polymarket board. Filter with ?q=text or ?min_liquidity=USD.",
+        "price_per_call": 0.002,
+    },
 ]
 
 

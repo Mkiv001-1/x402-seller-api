@@ -17,6 +17,7 @@ import * as defiYields from "./endpoints/defiYields.js";
 import * as githubTrending from "./endpoints/githubTrending.js";
 import * as agentPulse from "./endpoints/agentPulse.js";
 import * as evmPreflightMod from "./endpoints/evmPreflight.js";
+import * as predictionMarketsMod from "./endpoints/predictionMarkets.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -100,6 +101,31 @@ const routes = {
         },
       ],
       tokens: [{ address: "0x8335...", symbol: "USDC", decimals: 6, name: "USD Coin" }],
+    }
+  ),
+  "GET /v1/prediction/markets": accept(
+    config.prices.predictionMarkets,
+    predictionMarketsMod.meta.description,
+    {
+      properties: {
+        limit: { type: "integer", description: "Max markets (default 20, max 100)" },
+        q: { type: "string", description: "Substring filter over market question/slug" },
+        min_liquidity: { type: "number", description: "Drop markets with liquidity_usd below this" },
+      },
+    },
+    {
+      returned: 20,
+      markets: [
+        {
+          question: "Will United Russia (ER) gain the most seats in the next Russian parliamentary election?",
+          outcomes: [{ outcome: "Yes", implied_probability: 0.815 }, { outcome: "No", implied_probability: 0.185 }],
+          mid_probability: 0.815,
+          spread: 0.01,
+          liquidity_usd: 421853.01,
+          volume_24h_usd: 1633644.37,
+          end_date: "2026-09-30T00:00:00Z",
+        },
+      ],
     }
   ),
 };
@@ -215,8 +241,31 @@ openapi.paths["/v1/evm/preflight"] = {
   ),
 };
 
-app.get("/openapi.json", (_req, res) => res.json(openapi));
+openapi.paths["/v1/prediction/markets"] = {
+  get: pathSchema(
+    "Live prediction-market odds (Polymarket)",
+    "predictionMarkets",
+    predictionMarketsMod.meta.description,
+    config.prices.predictionMarkets,
+    {
+      type: "object",
+      properties: {
+        limit: { type: "integer", description: "Max markets (default 20, max 100)" },
+        q: { type: "string", description: "Substring filter over market question/slug" },
+        min_liquidity: { type: "number", description: "Drop markets with liquidity_usd below this" },
+      },
+    },
+    {
+      type: "object",
+      properties: {
+        returned: { type: "integer" },
+        markets: { type: "array", items: { type: "object" } },
+      },
+    }
+  ),
+};
 
+app.get("/openapi.json", (_req, res) => res.json(openapi));
 app.get("/favicon.svg", (_req, res) => {
   res.type("image/svg+xml").send(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#0052FF"/><text x="16" y="22" font-size="16" font-family="monospace" font-weight="bold" fill="#fff" text-anchor="middle">$</text></svg>`
@@ -259,6 +308,20 @@ app.get("/v1/agent/pulse", async (_req, res) => {
 app.get("/v1/evm/preflight", async (req, res) => {
   try {
     res.json(await evmPreflightMod.evmPreflight({ chain: req.query.chain || "base", tokens: req.query.tokens || "" }));
+  } catch (e) {
+    res.status(502).json({ error: "upstream failed", detail: e.message });
+  }
+});
+
+app.get("/v1/prediction/markets", async (req, res) => {
+  try {
+    res.json(
+      await predictionMarketsMod.predictionMarkets({
+        limit: req.query.limit || 20,
+        q: req.query.q || "",
+        minLiquidity: req.query.min_liquidity || 0,
+      })
+    );
   } catch (e) {
     res.status(502).json({ error: "upstream failed", detail: e.message });
   }

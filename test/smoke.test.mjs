@@ -21,6 +21,10 @@ const EXPECTED = {
   "/v1/github/trending": ["10000", "0.01"],
   "/v1/agent/pulse": ["30000", "0.03"],
   "/v1/evm/preflight": ["2000", "0.002"],
+  // 2026-09-20: prediction.market is the one capability with MEASURED x402 agent
+  // demand (EntRoute /discover: 1,313 req/7d vs 4 for finance.crypto_price), so we
+  // now serve live Polymarket odds at runtime-primitive pricing.
+  "/v1/prediction/markets": ["2000", "0.002"],
 };
 
 let server;
@@ -69,10 +73,10 @@ test("healthz reports testnet mode", async () => {
   assert.equal(d.testnet, true);
 });
 
-test("openapi.json: 7 paid paths with x-payment-info", async () => {
+test("openapi.json: 8 paid paths with x-payment-info", async () => {
   const d = await (await fetch(`${BASE}/openapi.json`)).json();
   assert.equal(d.info.title, "Money Agent RU Data API");
-  assert.equal(Object.keys(d.paths).length, 7);
+  assert.equal(Object.keys(d.paths).length, 8);
   for (const [p, [, price]] of Object.entries(EXPECTED)) {
     const op = d.paths[p].get;
     assert.ok(op["x-payment-info"], `${p} missing x-payment-info`);
@@ -91,7 +95,28 @@ test("all routes return 402 with correct payTo + atomic-unit amounts", async () 
 
 test("root endpoint lists all paid endpoints", async () => {
   const d = await (await fetch(`${BASE}/`)).json();
-  assert.equal(d.endpoints.length, 7);
+  assert.equal(d.endpoints.length, 8);
+});
+
+test("prediction/markets handler returns live odds with implied probabilities", async () => {
+  const { predictionMarkets } = await import("../src/endpoints/predictionMarkets.js");
+  const r = await predictionMarkets({ limit: 5 });
+  assert.ok(r.returned >= 1, "returned at least one live market");
+  const m = r.markets[0];
+  assert.ok(m.question, "has a question");
+  assert.ok(m.condition_id, "has a condition id");
+  assert.ok(Array.isArray(m.outcomes) && m.outcomes.length >= 1, "has outcomes");
+  assert.ok(
+    m.outcomes.every(
+      (o) => o.implied_probability === null || (o.implied_probability >= 0 && o.implied_probability <= 1)
+    ),
+    "implied probabilities are in [0,1]"
+  );
+  assert.ok(m.liquidity_usd > 0, "has liquidity");
+  // the text-search path must reach outside the top-volume board
+  const s = await predictionMarkets({ limit: 3, q: "bitcoin" });
+  assert.ok(s.returned >= 1, "q= search returns markets");
+  assert.equal(s.mode, "public-search");
 });
 
 test("evm/preflight handler resolves live gas + ERC-20 metadata (business logic)", async () => {

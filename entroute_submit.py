@@ -23,6 +23,14 @@ Usage:
   python entroute_submit.py next      # submit ONE pending endpoint, then exit
   python entroute_submit.py status    # list queue + submission statuses
   python entroute_submit.py reset     # rebuild the queue from SUBMISSIONS
+  python entroute_submit.py requeue   # move rate-limit-masked failures back
+
+BUG FIXED 2026-09-20: HTTP 500 {"internal_error"} is the rate-limit masquerade,
+  NOT a real failure. It happens whenever the hourly tick fires a shade EARLY
+  (the scheduler runs at :10:01, ~59m58s after the previous :10:03 submit), so a
+  bare 5xx was silently DROPPING routes from the queue (6 routes lost on 19.09).
+  Now: any 5xx is treated like 429 (kept at head of queue) and a hard guard
+  refuses to post unless >= MIN_GAP seconds have passed since the last success.
 """
 import json
 import os
@@ -34,6 +42,8 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 QUEUE = os.path.join(HERE, "entroute_queue.json")
 LOG = os.path.join(HERE, "entroute_submit.log")
+
+MIN_GAP = 3660  # seconds; server allows 1 submit/hour/IP, so leave 60s of slack
 
 UA = "money-agent-ru/1.0 (+https://mkiv001-1.github.io/airdrop-guides/)"
 API = "https://api.entroute.com"
@@ -91,11 +101,30 @@ def get(path, timeout=30):
         return e.code, e.read().decode(errors="ignore")
 
 
+def last_success_epoch(q):
+    """Epoch of the most recent accepted submit (from the done log), or None."""
+    best = None
+    for d in q.get("done", []):
+        if d.get("sid") and d.get("at"):
+            try:
+                t = time.mktime(time.strptime(d["at"], "%Y-%m-%dT%H:%M:%S"))
+            except Exception:
+                continue
+            best = t if best is None else max(best, t)
+    return best
+
+
 def cmd_next():
     q = load()
     if not q["pending"]:
         log("queue empty - nothing to submit")
         return 0
+    last = last_success_epoch(q)
+    if last is not None:
+        age = time.time() - last
+        if age < MIN_GAP:
+            log(f"WAIT last accepted submit was {int(age)}s ago (<{MIN_GAP}s) - skipping this tick")
+            return 0
     item = q["pending"][0]
     route, cap = item["route"], item["cap"]
     payload = {"endpoint_url": ORIGIN + route, "capability_id": cap, "contact_email": EMAIL}
@@ -115,14 +144,32 @@ def cmd_next():
         if v.get("instructions"):
             log("   verify: " + v["instructions"].replace("\n", " ")[:220])
         return 0
-    if st == 429:
-        log(f"RATE LIMITED {route} retry_after={d.get('retry_after')} - keeping at head of queue")
+    # 429 = honest rate limit; 5xx = the SAME thing wearing a disguise (see docstring).
+    if st == 429 or st >= 500:
+        reason = d.get("retry_after") or d.get("error") or d.get("raw", "")[:80]
+        log(f"RATE LIMITED (HTTP {st}) {route} {reason} - keeping at head of queue")
         return 0
     log(f"FAIL {st} {route} {json.dumps(d)[:200]} - dropped from queue")
     q["pending"].pop(0)
     q["done"].append({"route": route, "cap": cap, "status": f"http_{st}", "at": time.strftime("%Y-%m-%dT%H:%M:%S")})
     save(q)
     return 1
+
+
+def cmd_requeue():
+    """Move rate-limit-masked failures (http_5xx) from done back to the head of pending."""
+    q = load()
+    keep, requeued = [], []
+    for d in q["done"]:
+        if str(d.get("status", "")).startswith("http_5"):
+            requeued.append({"route": d["route"], "cap": d["cap"]})
+        else:
+            keep.append(d)
+    q["done"] = keep
+    q["pending"] = requeued + q["pending"]
+    save(q)
+    print(f"requeued {len(requeued)}: {[r['route'] for r in requeued]}")
+    return 0
 
 
 def cmd_status():
@@ -151,4 +198,5 @@ def cmd_reset():
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "status"
-    sys.exit({"next": cmd_next, "status": cmd_status, "reset": cmd_reset}[mode]())
+    sys.exit({"next": cmd_next, "status": cmd_status, "reset": cmd_reset,
+              "requeue": cmd_requeue}[mode]())

@@ -54,6 +54,9 @@ export const config = {
     githubTrending: "0.01", // commodity
     agentPulse: "0.03",     // unique: live agent-marketplace supply/demand pulse
     evmPreflight: "0.002",  // NEW cheap runtime primitive: gas/USD/token metadata
+    predictionMarkets: "0.002", // 20.09: the ONLY capability with measured x402 demand
+                                // (prediction.market: 1,313 /discover req/7d vs 4 for
+                                // finance.crypto_price) -> priced to be called in a loop
   },
 
   upstreamTimeoutMs: 12000,

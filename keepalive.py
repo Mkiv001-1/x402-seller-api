@@ -46,6 +46,8 @@ AGENTS = [
      "GitHub trending repositories, 7-day window."),
     ("moneyagentru-evm-preflight", "/v1/evm/preflight", "crypto-infrastructure",
      "Cheap runtime primitive for on-chain agents ($0.002): live gas price, block height, native-token USD price and the estimated USD cost of a native transfer / ERC-20 approve / swap on Base, Ethereum, Arbitrum, Optimism, Polygon and BSC - plus ERC-20 symbol/decimals/name resolution (?tokens=0x...)."),
+    ("moneyagentru-prediction-markets", "/v1/prediction/markets", "crypto-signals",
+     "Live prediction-market odds ($0.002): implied probability per outcome, executable bid/ask band, spread, liquidity and 24h/1w/1m drift across the whole Polymarket board. ?q=<text> searches the venue, ?min_liquidity=<usd> drops thin books. prediction.market is the single x402 capability with measured agent demand."),
 ]
 
 
