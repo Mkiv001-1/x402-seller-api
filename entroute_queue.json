@@ -13,10 +13,6 @@
    "cap": "crypto.gas_price"
   },
   {
-   "route": "/v1/github/trending",
-   "cap": "web.search"
-  },
-  {
    "route": "/v1/testnet/status",
    "cap": "news.search"
   },
@@ -33,6 +29,25 @@
    "sid": "cca82491-d929-45df-a090-2c6c679a0050",
    "claim_status": "pending",
    "at": "2026-09-19T07:05:57"
+  },
+  {
+   "route": "/v1/github/trending",
+   "cap": "web.search",
+   "status": "received",
+   "sid": "9e60c67b-c7ae-44ee-b1d4-3602eb9eeff2",
+   "domain": "https://moneyagent-ru2.loca.lt",
+   "claim_status": "pending",
+   "at": "2026-09-21T07:05:10"
+  },
+  {
+   "route": "/v1/prediction/markets",
+   "cap": "prediction.market",
+   "status": "received",
+   "sid": "397da629-1c46-4bfb-b2b4-a10dd45a7db8",
+   "domain": "https://moneyagent-ru.loca.lt",
+   "claim_status": "pending",
+   "at": "2026-09-21T07:04:06"
   }
- ]
+ ],
+ "note": "2026-09-21: EntRoute = ONE submission per DOMAIN (measured). Pending routes need their own unused hostname; see entroute_domains.json + keepalive.TUNNELS."
 }

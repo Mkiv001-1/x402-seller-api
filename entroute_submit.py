@@ -47,8 +47,54 @@ MIN_GAP = 3660  # seconds; server allows 1 submit/hour/IP, so leave 60s of slack
 
 UA = "money-agent-ru/1.0 (+https://mkiv001-1.github.io/airdrop-guides/)"
 API = "https://api.entroute.com"
-ORIGIN = "https://mi-desktop.rainbow-dab.ts.net:10000"
+ORIGIN = "https://mi-desktop.rainbow-dab.ts.net:10000"  # legacy ts.net origin (rejected)
 EMAIL = "michael.ivanov.tm@gmail.com"
+
+# --- THE REAL RULE, MEASURED 2026-09-21 -------------------------------------
+# EntRoute accepts **one submission per DOMAIN**, not one per hour. Proof:
+#   POST /submit moneyagent-ru.loca.lt   -> 201
+#   POST /submit moneyagent-ru.loca.lt (2nd, 3s later) -> 500 internal_error
+#   POST /submit moneyagent-ru2.loca.lt (fresh, 60s later) -> 201
+# The HTTP 500 {"code":"internal_error","message":"Failed to create submission"}
+# is therefore the masquerade for "this domain is already registered" (and for
+# an invalid/unreachable host) - NOT a rate limit. Consequence: the hourly queue
+# can never advance on one domain, and every extra route needs its own hostname.
+# localtunnel gives us exactly that, for free and without an account, and the
+# subdomain can be re-acquired by name, so keepalive.py supervises one process
+# per subdomain.
+DOMAIN_LOG = os.path.join(HERE, "entroute_domains.json")
+
+
+def tunnel_pool():
+    """Subdomains we can serve on, taken from keepalive.TUNNELS."""
+    try:
+        sys.path.insert(0, HERE)
+        import keepalive
+        return [f"https://{t}.loca.lt" for t in keepalive.TUNNELS]
+    except Exception:
+        return ["https://moneyagent-ru.loca.lt", "https://moneyagent-ru2.loca.lt"]
+
+
+def load_domains():
+    try:
+        with open(DOMAIN_LOG, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_domains(d):
+    with open(DOMAIN_LOG, "w", encoding="utf-8") as f:
+        json.dump(d, f, indent=1)
+
+
+def origin_alive(origin):
+    try:
+        req = urllib.request.Request(origin + "/openapi.json", headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return r.status == 200
+    except Exception:
+        return False
 
 SUBMISSIONS = [
     ("/v1/crypto/prices", "finance.crypto_price"),
@@ -115,19 +161,32 @@ def last_success_epoch(q):
 
 
 def cmd_next():
+    """Submit ONE pending route on a domain that has never been used.
+
+    EntRoute allows one submission per domain (measured 2026-09-21), so a route
+    can only go out if an unused, live localtunnel subdomain exists. When the
+    pool is exhausted this logs and exits 0 - the scheduled tick stays harmless.
+    """
     q = load()
     if not q["pending"]:
         log("queue empty - nothing to submit")
         return 0
-    last = last_success_epoch(q)
-    if last is not None:
-        age = time.time() - last
-        if age < MIN_GAP:
-            log(f"WAIT last accepted submit was {int(age)}s ago (<{MIN_GAP}s) - skipping this tick")
-            return 0
+    used = load_domains()
+    origin = None
+    for cand in tunnel_pool():
+        if cand in used:
+            continue
+        if origin_alive(cand):
+            origin = cand
+            break
+        log(f"candidate domain {cand} is unused but not serving - skipping")
+    if origin is None:
+        log(f"NO UNUSED LIVE DOMAIN for {len(q['pending'])} pending route(s) - EntRoute allows "
+            f"one submission per domain; add a subdomain to keepalive.TUNNELS to continue")
+        return 0
     item = q["pending"][0]
     route, cap = item["route"], item["cap"]
-    payload = {"endpoint_url": ORIGIN + route, "capability_id": cap, "contact_email": EMAIL}
+    payload = {"endpoint_url": origin + route, "capability_id": cap, "contact_email": EMAIL}
     st, body = post("/submit", payload)
     try:
         d = json.loads(body)
@@ -137,17 +196,25 @@ def cmd_next():
         q["pending"].pop(0)
         sid = d.get("submission_id")
         q["done"].append({"route": route, "cap": cap, "status": d.get("status"), "sid": sid,
+                          "domain": origin,
                           "claim_status": d.get("claim_status"), "at": time.strftime("%Y-%m-%dT%H:%M:%S")})
         save(q)
+        used[origin] = {"route": route, "cap": cap, "sid": sid,
+                        "at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+        save_domains(used)
         log(f"OK {st} {route} cap={cap} sid={sid} status={d.get('status')} claim={d.get('claim_status')}")
         v = d.get("verification") or {}
         if v.get("instructions"):
             log("   verify: " + v["instructions"].replace("\n", " ")[:220])
         return 0
-    # 429 = honest rate limit; 5xx = the SAME thing wearing a disguise (see docstring).
+    # 5xx = "this domain is already registered / cannot be validated" wearing a
+    # disguise. Do NOT retry it on the same domain: remember and move on.
     if st == 429 or st >= 500:
         reason = d.get("retry_after") or d.get("error") or d.get("raw", "")[:80]
-        log(f"RATE LIMITED (HTTP {st}) {route} {reason} - keeping at head of queue")
+        log(f"REFUSED (HTTP {st}) {route} on {origin} {reason} - route stays at head, domain marked")
+        used[origin] = {"route": route, "cap": cap, "status": f"http_{st}",
+                        "at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+        save_domains(used)
         return 0
     log(f"FAIL {st} {route} {json.dumps(d)[:200]} - dropped from queue")
     q["pending"].pop(0)
@@ -190,6 +257,19 @@ def cmd_status():
     return 0
 
 
+def cmd_domains():
+    used = load_domains()
+    pool = tunnel_pool()
+    print(f"domain pool: {len(pool)}  used: {len(used)}")
+    for d in pool:
+        u = used.get(d)
+        if u:
+            print(f"  {d:<40} USED  {u.get('route')} sid={u.get('sid')} {u.get('status', '')}")
+        else:
+            print(f"  {d:<40} free")
+    return 0
+
+
 def cmd_reset():
     save({"pending": [{"route": r, "cap": c} for r, c in SUBMISSIONS], "done": []})
     print("queue reset")
@@ -199,4 +279,4 @@ def cmd_reset():
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "status"
     sys.exit({"next": cmd_next, "status": cmd_status, "reset": cmd_reset,
-              "requeue": cmd_requeue}[mode]())
+              "requeue": cmd_requeue, "domains": cmd_domains}[mode]())

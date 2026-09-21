@@ -1,0 +1,14 @@
+{
+ "https://moneyagent-ru.loca.lt": {
+  "route": "/v1/prediction/markets",
+  "cap": "prediction.market",
+  "sid": "397da629-1c46-4bfb-b2b4-a10dd45a7db8",
+  "at": "2026-09-21T07:04:06"
+ },
+ "https://moneyagent-ru2.loca.lt": {
+  "route": "/v1/github/trending",
+  "cap": "web.search",
+  "sid": "9e60c67b-c7ae-44ee-b1d4-3602eb9eeff2",
+  "at": "2026-09-21T07:05:10"
+ }
+}

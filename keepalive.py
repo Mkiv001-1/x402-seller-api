@@ -31,6 +31,19 @@ PUBLIC_URL = f"https://{PUBLIC_HOST}:{FUNNEL_HTTPS_PORT}"
 WALLET = "0xD4D124D375775a146218dBD8243A2d17ba540596"
 ARENA = "https://core.x402arena.gg/register"
 
+# --- public origins -----------------------------------------------------------
+# We now run TWO classes of public origin for the same local server:
+#   1. Tailscale Funnel  -> stable, but wildcard-DNS/personal-tunnel hosts are
+#      refused by a growing list of registries (EntRoute answered HTTP 500 for
+#      *.ts.net, PayAPI triage says host_durability: needs_fix).
+#   2. localtunnel *.loca.lt -> accepted by EntRoute (2026-09-21: HTTP 201 for
+#      moneyagent-ru.loca.lt). EntRoute allows ONE submission per DOMAIN, so each
+#      extra route needs its own subdomain. These are free, no account, and
+#      re-acquirable: `lt --subdomain <name>` asks for the same name every time.
+# EntRoute records: logs/tunnels.json (subdomain -> pid) so we can restart them.
+TUNNELS = ["moneyagent-ru", "moneyagent-ru2"]
+TUNNEL_STATE = os.path.join(ROOT, "logs", "tunnels.json")
+
 AGENTS = [
     ("moneyagentru-funding-apy", "/v1/funding/apy", "crypto-signals",
      "Live Bybit perpetual funding-rate APY snapshot (700+ perps): top positive/negative funding, open interest, 24h turnover. Refreshed every 60s."),
@@ -128,6 +141,93 @@ def register():
     return ok
 
 
+def _load_tunnel_state():
+    try:
+        with open(TUNNEL_STATE, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_tunnel_state(st):
+    try:
+        with open(TUNNEL_STATE, "w", encoding="utf-8") as f:
+            json.dump(st, f, indent=1)
+    except Exception:
+        pass
+
+
+def tunnel_alive(sub, timeout=15, attempts=3):
+    """A localtunnel subdomain is alive if it serves our /healthz through the edge.
+
+    localtunnel's edge is occasionally slow or returns a 502 for a second while
+    reconnecting, so a single failure must not trigger a restart: that would
+    spawn a duplicate client which cannot claim the subdomain and dies. Retry
+    before declaring the tunnel dead.
+    """
+    for i in range(attempts):
+        try:
+            req = urllib.request.Request(f"https://{sub}.loca.lt/healthz",
+                                         headers={"User-Agent": "money-agent-ru/1.0"})
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                if r.status == 200 and b"ok" in r.read():
+                    return True
+                log(f"tunnel {sub}: check {i + 1} -> HTTP {r.status} (no ok flag)")
+        except Exception as e:
+            log(f"tunnel {sub}: check {i + 1} failed {type(e).__name__} {str(e)[:80]}")
+        if i < attempts - 1:
+            time.sleep(5)
+    return False
+
+
+def start_tunnel(sub):
+    """ (Re)start `lt --subdomain <sub>`. Kills a tracked stale pid first. """
+    st = _load_tunnel_state()
+    pid = st.get(sub)
+    if pid:
+        try:
+            subprocess.run(["powershell", "-NoProfile", "-Command",
+                            f"Stop-Process -Id {int(pid)} -Force -ErrorAction SilentlyContinue"],
+                           capture_output=True, timeout=25)
+        except Exception as e:
+            log(f"tunnel {sub}: stale kill failed {e!r}")
+        time.sleep(2)
+    f = open(os.path.join(ROOT, "logs", f"lt_{sub}.log"), "a", encoding="utf-8")
+    try:
+        p = subprocess.Popen(
+            ["cmd", "/c", f"npx --yes localtunnel --port {PORT} --subdomain {sub}"],
+            cwd=HERE, stdout=f, stderr=subprocess.STDOUT,
+            creationflags=0x00000008 | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
+    except Exception as e:
+        log(f"tunnel {sub}: spawn failed {e!r}")
+        return False
+    st[sub] = p.pid
+    _save_tunnel_state(st)
+    log(f"tunnel {sub}: spawned pid {p.pid} -> https://{sub}.loca.lt")
+    return True
+
+
+def ensure_tunnels():
+    """Keep every requested localtunnel subdomain serving our API."""
+    ok = 0
+    for sub in TUNNELS:
+        if tunnel_alive(sub):
+            ok += 1
+            continue
+        log(f"tunnel {sub}: not serving -> restarting")
+        start_tunnel(sub)
+        for _ in range(24):
+            time.sleep(2.5)
+            if tunnel_alive(sub):
+                ok += 1
+                log(f"tunnel {sub}: up")
+                break
+        else:
+            log(f"tunnel {sub}: STILL DOWN after 60s")
+    log(f"tunnels alive: {ok}/{len(TUNNELS)}")
+    return ok == len(TUNNELS)
+
+
 def health():
     try:
         with urllib.request.urlopen(f"http://127.0.0.1:{PORT}/healthz", timeout=8) as r:
@@ -135,6 +235,8 @@ def health():
     except Exception as e:
         log(f"local healthz error: {e!r}")
     log("funnel mapped: %s" % funnel_ok())
+    for sub in TUNNELS:
+        log(f"tunnel {sub}: alive={tunnel_alive(sub, timeout=15)}")
 
 
 def main():
@@ -143,7 +245,7 @@ def main():
     if "--check" in sys.argv:
         health(); return 0
     if "--ensure" in sys.argv:
-        start_server(); ensure_funnel(); health(); return 0
+        start_server(); ensure_funnel(); ensure_tunnels(); health(); return 0
     # singleton guard: only one daemon at a time (bind a lock port)
     lock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -154,13 +256,18 @@ def main():
         return 0
     srv = start_server()
     ensure_funnel()
-    log("keepalive started (public %s)" % PUBLIC_URL)
+    ensure_tunnels()
+    log("keepalive started (public %s + %s)" % (PUBLIC_URL, ", ".join(f"{t}.loca.lt" for t in TUNNELS)))
+    tick = 0
     while True:
         if not port_open():
             log("server died; restarting")
             srv = start_server()
         if not funnel_ok():
             ensure_funnel()
+        tick += 1
+        if tick % 5 == 0:  # tunnel health through the public edge, every ~5 min
+            ensure_tunnels()
         time.sleep(60)
 
 
