@@ -18,6 +18,7 @@ import * as githubTrending from "./endpoints/githubTrending.js";
 import * as agentPulse from "./endpoints/agentPulse.js";
 import * as evmPreflightMod from "./endpoints/evmPreflight.js";
 import * as predictionMarketsMod from "./endpoints/predictionMarkets.js";
+import { agentManifest } from "./endpoints/agentManifest.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -144,6 +145,13 @@ app.get("/", (_req, res) => {
 });
 
 app.get("/healthz", (_req, res) => res.json({ ok: true, testnet: config.testnet }));
+
+// ---- agent.json capability manifest (agent-json spec v1.4) ----
+// Served on BOTH the canonical well-known path and the bare path. The manifest is
+// built per request from the Host header, because the validator that guards
+// registry promotion (ArcedeDev/open-402) requires manifest.origin === domain.
+app.get("/.well-known/agent.json", (req, res) => res.json(agentManifest(req.hostname)));
+app.get("/agent.json", (req, res) => res.json(agentManifest(req.hostname)));
 
 // ---- OpenAPI discovery document (canonical contract for x402scan/agent discovery) ----
 const openapi = {

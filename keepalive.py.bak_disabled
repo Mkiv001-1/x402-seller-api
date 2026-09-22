@@ -28,12 +28,6 @@ PORT = 4021
 PUBLIC_HOST = "mi-desktop.rainbow-dab.ts.net"
 FUNNEL_HTTPS_PORT = "10000"
 PUBLIC_URL = f"https://{PUBLIC_HOST}:{FUNNEL_HTTPS_PORT}"
-# 2026-09-22: the funnel now ALSO serves :443 (the default HTTPS port). This is not
-# cosmetic. Registry crawlers refuse a non-443 origin outright - ArcedeDev/open-402
-# rejects any manifest URL whose port is set and not 443 (scripts/lib/manifest.ts),
-# and PayAPI's triage flagged our origin under host_durability. On 443 the stable
-# Funnel host is crawlable, so `https://PUBLIC_HOST` is our real, durable origin.
-PUBLIC_URL_443 = f"https://{PUBLIC_HOST}"
 WALLET = "0xD4D124D375775a146218dBD8243A2d17ba540596"
 ARENA = "https://core.x402arena.gg/register"
 
@@ -47,7 +41,7 @@ ARENA = "https://core.x402arena.gg/register"
 #      extra route needs its own subdomain. These are free, no account, and
 #      re-acquirable: `lt --subdomain <name>` asks for the same name every time.
 # EntRoute records: logs/tunnels.json (subdomain -> pid) so we can restart them.
-TUNNELS = ["moneyagent-ru", "moneyagent-ru2", "moneyagent-ru4"]
+TUNNELS = ["moneyagent-ru", "moneyagent-ru2"]
 TUNNEL_STATE = os.path.join(ROOT, "logs", "tunnels.json")
 
 AGENTS = [
@@ -103,26 +97,9 @@ def start_server():
 
 
 def funnel_ok():
-    """True when BOTH funnel ports are mapped to our server.
-
-    Port 443 matters as much as 10000: registry crawlers refuse a non-standard port
-    (open-402 rejects any manifest URL whose port is set and not 443), so 443 is what
-    makes the stable host usable at all. Checked together so a dropped 443 mapping is
-    repaired on the next tick instead of silently staying broken.
-    """
     try:
         out = subprocess.run([TS, "funnel", "status"], capture_output=True, text=True, timeout=20)
-        s = out.stdout
-        ok10000 = FUNNEL_HTTPS_PORT in s and f"127.0.0.1:{PORT}" in s
-        # "https://host (Funnel on)" with NO :port is the 443 mapping.
-        ok443 = any(
-            line.startswith(f"https://{PUBLIC_HOST} (Funnel on)") or
-            line.strip() == f"https://{PUBLIC_HOST} (Funnel on)"
-            for line in s.splitlines()
-        )
-        if not ok443:
-            log("funnel: 443 mapping missing")
-        return ok10000 and ok443
+        return (FUNNEL_HTTPS_PORT in out.stdout and f"127.0.0.1:{PORT}" in out.stdout)
     except Exception as e:
         log(f"funnel status error: {e!r}")
         return False
@@ -131,18 +108,15 @@ def funnel_ok():
 def ensure_funnel():
     if funnel_ok():
         return True
-    log(f"configuring tailscale funnel {PUBLIC_URL} + {PUBLIC_URL_443} -> 127.0.0.1:{PORT}")
-    ok = True
-    for port in (FUNNEL_HTTPS_PORT, "443"):
-        try:
-            r = subprocess.run([TS, "funnel", "--bg", f"--https={port}", str(PORT)],
-                               capture_output=True, text=True, timeout=40)
-            log(f"funnel --https={port} rc=%s" % r.returncode)
-            ok = ok and r.returncode == 0
-        except Exception as e:
-            log(f"funnel set {port} error: {e!r}")
-            ok = False
-    return ok
+    log(f"configuring tailscale funnel {PUBLIC_URL} -> 127.0.0.1:{PORT}")
+    try:
+        r = subprocess.run([TS, "funnel", "--bg", f"--https={FUNNEL_HTTPS_PORT}", str(PORT)],
+                           capture_output=True, text=True, timeout=40)
+        log("funnel set rc=%s" % r.returncode)
+        return r.returncode == 0
+    except Exception as e:
+        log(f"funnel set error: {e!r}")
+        return False
 
 
 def register():
@@ -207,24 +181,7 @@ def tunnel_alive(sub, timeout=15, attempts=3):
 
 
 def start_tunnel(sub):
-    """ (Re)start the localtunnel client for `sub`. Kills a tracked stale pid first.
-
-    MEASURED 2026-09-22: spawning through `npx --yes localtunnel` is NOT reliable
-    under a supervisor. When the supervisor restarts several tunnels, the parallel
-    npx runs contend for the npm cache, the child dies before printing anything,
-    and the log file stays 0 bytes while the edge keeps answering 503 for the
-    subdomain - i.e. the tunnel is never actually claimed. Proven by control: a
-    single manual `npx localtunnel --subdomain <fresh>` served /healthz 200 within
-    seconds on a brand-new name, while all five supervised names sat at 503.
-    Fix: run the locally installed binary (node_modules/localtunnel/bin/lt.js)
-    directly - no npm resolution, no cache lock, ~1s startup. npx stays as the
-    fallback for a fresh checkout where the dependency is absent.
-    """
-    lt = os.path.join(HERE, "node_modules", "localtunnel", "bin", "lt.js")
-    if os.path.isfile(lt):
-        argv = ["node", lt, "--port", str(PORT), "--subdomain", sub]
-    else:
-        argv = ["cmd", "/c", f"npx --yes localtunnel --port {PORT} --subdomain {sub}"]
+    """ (Re)start `lt --subdomain <sub>`. Kills a tracked stale pid first. """
     st = _load_tunnel_state()
     pid = st.get(sub)
     if pid:
@@ -238,7 +195,8 @@ def start_tunnel(sub):
     f = open(os.path.join(ROOT, "logs", f"lt_{sub}.log"), "a", encoding="utf-8")
     try:
         p = subprocess.Popen(
-            argv, cwd=HERE, stdout=f, stderr=subprocess.STDOUT,
+            ["cmd", "/c", f"npx --yes localtunnel --port {PORT} --subdomain {sub}"],
+            cwd=HERE, stdout=f, stderr=subprocess.STDOUT,
             creationflags=0x00000008 | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
     except Exception as e:
         log(f"tunnel {sub}: spawn failed {e!r}")
@@ -249,64 +207,23 @@ def start_tunnel(sub):
     return True
 
 
-def pid_alive(pid):
-    """True if the process is still running (no psutil dependency)."""
-    if not pid:
-        return False
-    try:
-        out = subprocess.run(["powershell", "-NoProfile", "-Command",
-                              f"if (Get-Process -Id {int(pid)} -ErrorAction SilentlyContinue) {{'1'}}"],
-                             capture_output=True, text=True, timeout=20)
-        return "1" in out.stdout
-    except Exception:
-        # Fail safe: if we cannot tell, assume alive. Killing a healthy client is the
-        # expensive mistake (see ensure_tunnels), so never guess in that direction.
-        return True
-
-
 def ensure_tunnels():
-    """Keep every requested localtunnel subdomain serving our API.
-
-    DESIGN LESSON 2026-09-22. The previous version trusted the edge probe alone and
-    restarted whenever a probe failed. That thrashed: each restart killed the client
-    the supervisor had spawned seconds earlier, the freshly spawned client was killed
-    again before localtunnel's edge had finished registering the subdomain, and all
-    five tunnels sat at 503 for 40+ minutes while the log filled with restart noise.
-    Evidence that the probe is NOT a liveness signal: manually starting one client
-    for a subdomain that had been "dead" for an hour turned it green in ~15s, and
-    `cmd /c start /b node lt.js` produced a client that never registered at all
-    (HTTP 503 forever, empty log) while a plain Popen of the same argv worked - so
-    the restart mechanism matters more than the hostname.
-    The rule now: the PID decides. A live client is never killed; a dead one is
-    replaced, and the replacement gets a long, patient window to register.
-    """
+    """Keep every requested localtunnel subdomain serving our API."""
     ok = 0
-    st = _load_tunnel_state()
     for sub in TUNNELS:
-        pid = st.get(sub)
-        alive = pid_alive(pid)
-        serving = tunnel_alive(sub, attempts=2 if not alive else 3)
-        if serving:
+        if tunnel_alive(sub):
             ok += 1
-            if not alive:
-                # Serving from a client we did not know about - nothing to fix.
-                log(f"tunnel {sub}: serving (untracked client)")
             continue
-        if alive:
-            # Client is running but the edge does not serve it yet. WAIT. Killing it
-            # here is exactly the bug that kept every tunnel down.
-            log(f"tunnel {sub}: client pid {pid} alive, edge not serving yet - waiting")
-            continue
-        log(f"tunnel {sub}: no live client -> starting one")
+        log(f"tunnel {sub}: not serving -> restarting")
         start_tunnel(sub)
-        for _ in range(48):  # up to 120s: localtunnel registration is not instant
+        for _ in range(24):
             time.sleep(2.5)
-            if tunnel_alive(sub, attempts=1):
+            if tunnel_alive(sub):
                 ok += 1
                 log(f"tunnel {sub}: up")
                 break
         else:
-            log(f"tunnel {sub}: STILL DOWN after 120s (client kept running for the next cycle)")
+            log(f"tunnel {sub}: STILL DOWN after 60s")
     log(f"tunnels alive: {ok}/{len(TUNNELS)}")
     return ok == len(TUNNELS)
 
